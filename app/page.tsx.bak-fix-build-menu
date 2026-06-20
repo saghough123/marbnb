@@ -162,9 +162,59 @@ export default function Home() {
           <button onClick={() => setPage("admin")} className="rounded-full bg-[#0f2f22] px-5 py-2.5 text-sm font-black text-white">Admin</button>
         </div>
       
-          
+          {/* FORCE_REMOVE_MOBILE_NAV_START */}
+          <style jsx global>{`
+            @media (max-width: 767px) {
+              header > div > :nth-child(2) {
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
+                width: 0 !important;
+                height: 0 !important;
+                overflow: hidden !important;
+              }
+
+              header + nav,
+              header + div,
+              header + section[class*="border-b"] {
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
+                height: 0 !important;
+                min-height: 0 !important;
+                max-height: 0 !important;
+                overflow: hidden !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: 0 !important;
+              }
+            }
+          `}</style>
+          {/* FORCE_REMOVE_MOBILE_NAV_END */}
 </header>
-      
+      {/* MBNT_REMOVE_MOBILE_MENU_START */}
+      <style jsx global>{`
+        @media (max-width: 767px) {
+          /* Cache la barre de navigation horizontale entre le header et le hero */
+          header + nav,
+          header + div[class*="border-b"],
+          header + div[class*="sticky"],
+          header + div[class*="backdrop"],
+          nav:has(a),
+          nav:has(button) {
+            display: none !important;
+            height: 0 !important;
+            min-height: 0 !important;
+            max-height: 0 !important;
+            overflow: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+          }
+        }
+      `}</style>
+      {/* MBNT_REMOVE_MOBILE_MENU_END */}
 
       {/* MBNT_CTA_START */}
       {page === "accueil" && (
