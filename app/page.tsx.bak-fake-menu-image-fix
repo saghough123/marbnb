@@ -170,13 +170,11 @@ export default function Home() {
    {page === "accueil" && (
     <section className="relative min-h-[720px] overflow-hidden border-b border-[#e5d3b3]">
      <div className="absolute inset-0">
-      <img src="/porte-marocaine.png" alt="Porte traditionnelle marocaine" className="h-full w-full object-cover object-bottom md:object-center" />
+      <img src="/porte-marocaine.png" alt="Porte traditionnelle marocaine" className="h-full w-full object-cover" />
       <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/35 to-black/10" />
-            {/* MBNT_HIDE_FAKE_MENU_IN_IMAGE */}
-            <div className="absolute inset-x-0 top-0 h-32 bg-[#f4ead7]/95 md:hidden" />
       <div className="absolute inset-0 bg-gradient-to-t from-[#f4ead7] via-transparent to-black/20" />
      </div>
-     <div className="relative mx-auto flex min-h-[720px] max-w-7xl items-center px-4 pb-16 pt-36 md:py-16">
+     <div className="relative mx-auto flex min-h-[720px] max-w-7xl items-center px-4 py-16">
       <div className="max-w-2xl rounded-[2rem] border border-white/20 bg-black/35 p-6 text-white shadow-2xl backdrop-blur-sm md:p-8">
        <p className="inline-flex rounded-full border border-white/30 bg-white/15 px-4 py-2 text-sm font-black text-white backdrop-blur">🇲🇦 Mbnb · Séjours authentiques au Maroc</p>
        <h2 className="mt-6 text-5xl font-black leading-tight drop-shadow md:text-7xl">Bienvenue au Maroc.</h2>
@@ -191,7 +189,7 @@ export default function Home() {
         <span className="w-full text-xs font-medium text-white/70">Langues affichées à titre décoratif — traduction complète bientôt.</span>
        </div>
        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-        <button onClick={() => { window.location.href = '/resultats?destination=' + encodeURIComponent(destination) + '&arrivee=' + encodeURIComponent(arrivee) + '&depart=' + encodeURIComponent(depart) + '&voyageurs=' + voyageurs; }} className="rounded-full bg-[#c1121f] px-8 py-4 font-black text-white shadow-xl hover:bg-[#a50f1a]">Trouver un séjour</button>
+        <button onClick={() => { window.location.href = '/resultats?destination=' + encodeURIComponent(destination) + '&arrivee=' + encodeURIComponent(arrivee) + '&depart=' + encodeURIComponent(depart) + '&voyageurs=' + voyageurs; }} className="rounded-full bg-[#c1121f] px-8 py-4 font-black text-white shadow-xl hover:bg-[#a50f1a]">Trouver un séjourséjour</button>
         <button onClick={() => setFormulaireOuvert(true)} className="rounded-full border border-white/40 bg-white/15 px-8 py-4 font-black text-white backdrop-blur hover:bg-white/25">Publier un logement</button>
        </div>
       </div>

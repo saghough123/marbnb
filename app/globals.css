@@ -80,3 +80,19 @@ body {
   }
 }
 /* MBNT_HIDE_EMPTY_MOBILE_MENU_END */
+
+/* MBNT_FINAL_MOBILE_CLEAN_START */
+@media (max-width: 767px) {
+  button:empty,
+  a:empty,
+  nav:empty {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    pointer-events: none !important;
+  }
+}
+/* MBNT_FINAL_MOBILE_CLEAN_END */
