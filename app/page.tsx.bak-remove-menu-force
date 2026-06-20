@@ -162,28 +162,6 @@ export default function Home() {
           <button onClick={() => setPage("admin")} className="rounded-full bg-[#0f2f22] px-5 py-2.5 text-sm font-black text-white">Admin</button>
         </div>
       </header>
-      {/* MBNT_REMOVE_MOBILE_MENU_START */}
-      <style jsx global>{`
-        @media (max-width: 767px) {
-          /* Cache la barre de navigation horizontale entre le header et le hero */
-          header + nav,
-          header + div[class*="border-b"],
-          header + div[class*="sticky"],
-          header + div[class*="backdrop"],
-          nav:has(a),
-          nav:has(button) {
-            display: none !important;
-            height: 0 !important;
-            min-height: 0 !important;
-            max-height: 0 !important;
-            overflow: hidden !important;
-            opacity: 0 !important;
-            pointer-events: none !important;
-          }
-        }
-      `}</style>
-      {/* MBNT_REMOVE_MOBILE_MENU_END */}
-
       {/* MBNT_CTA_START */}
       {page === "accueil" && (
         <section className="relative min-h-[720px] overflow-hidden border-b border-[#e5d3b3]">
