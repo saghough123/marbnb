@@ -96,3 +96,21 @@ body {
   }
 }
 /* MBNT_FINAL_MOBILE_CLEAN_END */
+
+/* MBNT_FINAL_FAKE_MENU_CROP_START */
+@media (max-width: 767px) {
+  .mbnb-hero-bg {
+    object-position: center 78% !important;
+    transform: scale(1.18) translateY(80px) !important;
+    transform-origin: center bottom !important;
+  }
+
+  .mbnb-fake-menu-mask {
+    display: block !important;
+    height: 210px !important;
+    background: linear-gradient(to bottom, #fff8ec 0%, #fff8ec 72%, rgba(255,248,236,0.92) 100%) !important;
+    z-index: 5 !important;
+    pointer-events: none !important;
+  }
+}
+/* MBNT_FINAL_FAKE_MENU_CROP_END */
