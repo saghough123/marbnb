@@ -155,10 +155,10 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#f4ead7] text-[#1e1b18]">
       <div className="pointer-events-none fixed inset-0 -z-10 opacity-[0.07]" style={{backgroundImage:"radial-gradient(#9b1c1c 1px, transparent 1px)", backgroundSize:"22px 22px"}} />
-      <header className="sticky top-0 z-50 border-b border-[#e5d3b3] bg-[#fff8ec]/95 backdrop-blur-xl">
+      <header className="sticky top-0 z-30 border-b border-[#e5d3b3] bg-[#fff8ec]/95 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <button onClick={() => setPage("accueil")} className="flex items-center gap-3 text-left"><img src="/logo.png" alt="Logo Mbnb" className="h-12 w-12 rounded-2xl object-cover ring-2 ring-[#c59b54]/30" onError={(e)=>{e.currentTarget.style.display="none"}} /><div><h1 className="text-2xl font-black"><span className="text-[#c1121f]">M</span><span className="text-[#10271d]">bnb</span></h1><p className="hidden text-xs text-[#7a6446] sm:block">Séjours authentiques au Maroc</p></div></button>
-          <div className="flex items-center gap-7 overflow-x-auto whitespace-nowrap px-4 text-sm font-bold md:px-0"><button onClick={() => setPage("accueil")} className="hover:text-[#c1121f]">Séjours</button><button onClick={() => setFormulaireOuvert(true)} className="hover:text-[#c1121f]">Mettre mon logement</button></div>
+          <div className="hidden items-center gap-6 text-sm font-bold md:flex"><button onClick={() => setPage("accueil")} className="hover:text-[#c1121f]">Séjours</button><button onClick={() => setFormulaireOuvert(true)} className="hover:text-[#c1121f]">Mettre mon logement</button></div>
           <button onClick={() => setPage("admin")} className="rounded-full bg-[#0f2f22] px-5 py-2.5 text-sm font-black text-white">Admin</button>
         </div>
       </header>
