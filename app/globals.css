@@ -24,3 +24,38 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* MBNT_FORCE_HIDE_MOBILE_NAV_START */
+@media (max-width: 767px) {
+  /* Cache le menu dans le header: Séjours / Mettre mon logement */
+  header > div > :nth-child(2) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Cache la barre juste après le header: Séjours / Expériences / Devenir hôte / À propos */
+  header + nav,
+  header + div[class*="border-b"],
+  header + div[class*="sticky"],
+  header + div[class*="backdrop"],
+  header + div[class*="bg-[#fff8ec]"],
+  header + div[class*="bg-white"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+}
+/* MBNT_FORCE_HIDE_MOBILE_NAV_END */
