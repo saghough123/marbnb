@@ -36,6 +36,12 @@ function nuitsEntre(a: string, d: string) {
   return diff > 0 ? diff : 0;
 }
 
+function dateAujourdhuiISO() {
+  const d = new Date();
+  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+}
+
 function prix(mad: number, devise: Devise) {
   const v = Math.round(mad * tauxDevise[devise]);
   return devise === "MAD" ? `${v} MAD` : `${symbole[devise]} ${v}`;
@@ -45,12 +51,12 @@ function ResultatsContent() {
   const params = useSearchParams();
   const destinationInitiale = params.get("destination") || "";
   const arriveeInitiale = params.get("arrivee") || "2026-06-18";
-  const departInitial = params.get("depart") || "2026-06-22";
+  // La date de départ affichée est toujours le jour d'ouverture de la page.
   const voyageursInitial = Number(params.get("voyageurs") || 1);
 
   const [destination, setDestination] = useState(destinationInitiale);
   const [arrivee, setArrivee] = useState(arriveeInitiale);
-  const [depart, setDepart] = useState(departInitial);
+  const [depart, setDepart] = useState(dateAujourdhuiISO());
   const [voyageurs, setVoyageurs] = useState(Math.max(1, voyageursInitial));
   const [paiement, setPaiement] = useState<Paiement>("ligne");
   const [devise, setDevise] = useState<Devise>("MAD");
@@ -77,7 +83,7 @@ function ResultatsContent() {
             <div><label className="text-xs font-black text-[#7a3d14]">Arrivée</label><input type="date" value={arrivee} onChange={(e) => setArrivee(e.target.value)} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" /></div>
             <div><label className="text-xs font-black text-[#7a3d14]">Départ</label><input type="date" value={depart} onChange={(e) => setDepart(e.target.value)} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" /></div>
             <div><label className="text-xs font-black text-[#7a3d14]">Voyageurs</label><input type="number" min={1} value={voyageurs} onChange={(e) => setVoyageurs(Math.max(1, Number(e.target.value) || 1))} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" /></div>
-            <button onClick={() => setMessage("")} className="rounded-2xl bg-[#c1121f] px-6 py-3 font-black text-white md:self-end">Actualiser</button>
+            <button onClick={() => { window.location.href = '/resultats?destination=' + encodeURIComponent(destination) + '&arrivee=' + encodeURIComponent(arrivee) + '&depart=' + encodeURIComponent(depart) + '&voyageurs=' + voyageurs; }} className="rounded-2xl bg-[#c1121f] px-6 py-3 font-black text-white md:self-end">Rechercher</button>
           </div>
         </section>
 
