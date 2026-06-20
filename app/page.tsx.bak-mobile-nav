@@ -168,7 +168,6 @@ export default function Home() {
                 <span className="rounded-full bg-white/15 px-3 py-1 backdrop-blur">Bienvenido</span>
                 <span className="rounded-full bg-white/15 px-3 py-1 backdrop-blur">Willkommen</span>
                 <span className="rounded-full bg-white/15 px-3 py-1 backdrop-blur">Benvenuto</span>
-                <span className="w-full text-xs font-medium text-white/70">Langues affichées à titre décoratif — traduction complète bientôt.</span>
               </div>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <button onClick={() => { window.location.href = '/resultats?destination=' + encodeURIComponent(destination) + '&arrivee=' + encodeURIComponent(arrivee) + '&depart=' + encodeURIComponent(depart) + '&voyageurs=' + voyageurs; }} className="rounded-full bg-[#c1121f] px-8 py-4 font-black text-white shadow-xl hover:bg-[#a50f1a]">Trouver un séjour</button>
