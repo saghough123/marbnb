@@ -1,0 +1,145 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
+
+type Demande = {
+  id: number;
+  nom: string;
+  telephone: string | null;
+  ville: string | null;
+  quartier: string | null;
+  type_logement: string | null;
+  titre: string | null;
+  prix: number | null;
+  chambres: number | null;
+  voyageurs: number | null;
+  description: string | null;
+  photos: string | null;
+  statut: string | null;
+  created_at: string | null;
+};
+
+export default function AdminDemandesPage() {
+  const [demandes, setDemandes] = useState<Demande[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+
+  async function chargerDemandes() {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("demandes_hotes")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      setMessage("Erreur Supabase : " + error.message);
+      setDemandes([]);
+    } else {
+      setMessage("");
+      setDemandes(data || []);
+    }
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    chargerDemandes();
+  }, []);
+
+  async function changerStatut(id: number, statut: string) {
+    const { error } = await supabase
+      .from("demandes_hotes")
+      .update({ statut })
+      .eq("id", id);
+
+    if (error) {
+      setMessage("Erreur changement statut : " + error.message);
+      return;
+    }
+
+    setDemandes((old) => old.map((d) => d.id === id ? { ...d, statut } : d));
+  }
+
+  async function publierLogement(d: Demande) {
+    const { error: insertError } = await supabase.from("logements").insert({
+      titre: d.titre || "Logement Mbnb",
+      ville: d.ville || "",
+      quartier: d.quartier || "",
+      type_logement: d.type_logement || "Appartement",
+      prix: Number(d.prix || 0),
+      chambres: Number(d.chambres || 1),
+      voyageurs: Number(d.voyageurs || 1),
+      description: d.description || "",
+      image_url: d.photos || "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=900&auto=format&fit=crop&q=80",
+      statut: "Actif",
+    });
+
+    if (insertError) {
+      setMessage("Erreur publication logement : " + insertError.message);
+      return;
+    }
+
+    await changerStatut(d.id, "Acceptée et publiée");
+    setMessage("Logement publié avec succès ✅ Il apparaît maintenant dans /resultats.");
+  }
+
+  return (
+    <main className="min-h-screen bg-[#f4ead7] px-4 py-8 text-[#1e1b18]">
+      <div className="mx-auto max-w-7xl">
+        <div className="flex items-center justify-between gap-3">
+          <a href="/" className="text-sm font-black text-[#c1121f]">← Accueil</a>
+          <a href="/hote" className="rounded-full bg-[#0f2f22] px-5 py-2 text-sm font-black text-white">Ajouter demande test</a>
+        </div>
+
+        <section className="mt-5 rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3]">
+          <p className="font-black text-[#c1121f]">Admin Mbnb</p>
+          <h1 className="mt-2 text-4xl font-black">Demandes hôtes</h1>
+          <p className="mt-3 text-[#7a6446]">Cette page lit les demandes depuis Supabase et permet de les traiter.</p>
+
+          {message && <p className="mt-4 rounded-2xl bg-green-50 p-4 font-bold text-green-800">{message}</p>}
+          {loading && <p className="mt-6 font-bold">Chargement...</p>}
+
+          {!loading && demandes.length === 0 && (
+            <p className="mt-6 rounded-2xl bg-amber-50 p-4 font-bold text-amber-700">Aucune demande pour le moment.</p>
+          )}
+
+          <div className="mt-6 grid gap-5">
+            {demandes.map((d) => (
+              <article key={d.id} className="grid gap-4 rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-[#e5d3b3] md:grid-cols-[220px_1fr]">
+                <div>
+                  {d.photos ? <img src={d.photos} alt={d.titre || "Logement"} className="h-44 w-full rounded-2xl object-cover" /> : <div className="grid h-44 place-items-center rounded-2xl bg-[#f4ead7] text-sm font-bold text-[#7a6446]">Pas de photo</div>}
+                </div>
+                <div>
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <h2 className="text-2xl font-black">{d.titre || "Sans titre"}</h2>
+                      <p className="text-sm text-[#7a6446]">{d.type_logement} · {d.quartier}, {d.ville}</p>
+                    </div>
+                    <span className="rounded-full bg-[#f4ead7] px-4 py-2 text-sm font-black text-[#7a3d14]">{d.statut || "En attente"}</span>
+                  </div>
+
+                  <div className="mt-4 grid gap-2 text-sm text-[#5f4b32] md:grid-cols-3">
+                    <p><b>Hôte :</b> {d.nom}</p>
+                    <p><b>Téléphone :</b> {d.telephone || "-"}</p>
+                    <p><b>Prix :</b> {d.prix || 0} MAD / nuit</p>
+                    <p><b>Chambres :</b> {d.chambres || 1}</p>
+                    <p><b>Voyageurs :</b> {d.voyageurs || 1}</p>
+                    <p><b>Date :</b> {d.created_at ? new Date(d.created_at).toLocaleDateString("fr-FR") : "-"}</p>
+                  </div>
+
+                  <p className="mt-4 text-sm leading-6 text-[#5f4b32]">{d.description || "Aucune description."}</p>
+
+                  <div className="mt-5 flex flex-wrap gap-3">
+                    <button onClick={() => publierLogement(d)} className="rounded-full bg-green-700 px-5 py-3 text-sm font-black text-white">Accepter + publier</button>
+                    <button onClick={() => changerStatut(d.id, "Refusée")} className="rounded-full bg-red-700 px-5 py-3 text-sm font-black text-white">Refuser</button>
+                    <button onClick={() => changerStatut(d.id, "En attente")} className="rounded-full bg-[#f4ead7] px-5 py-3 text-sm font-black text-[#7a3d14]">Remettre en attente</button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}
