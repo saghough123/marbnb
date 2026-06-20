@@ -161,39 +161,7 @@ export default function Home() {
           <div className="flex items-center gap-7 overflow-x-auto whitespace-nowrap px-4 text-sm font-bold md:px-0"><button onClick={() => setPage("accueil")} className="hover:text-[#c1121f]">Séjours</button><button onClick={() => setFormulaireOuvert(true)} className="hover:text-[#c1121f]">Mettre mon logement</button></div>
           <button onClick={() => setPage("admin")} className="rounded-full bg-[#0f2f22] px-5 py-2.5 text-sm font-black text-white">Admin</button>
         </div>
-      
-          {/* FORCE_REMOVE_MOBILE_NAV_START */}
-          <style jsx global>{`
-            @media (max-width: 767px) {
-              header > div > :nth-child(2) {
-                display: none !important;
-                visibility: hidden !important;
-                opacity: 0 !important;
-                pointer-events: none !important;
-                width: 0 !important;
-                height: 0 !important;
-                overflow: hidden !important;
-              }
-
-              header + nav,
-              header + div,
-              header + section[class*="border-b"] {
-                display: none !important;
-                visibility: hidden !important;
-                opacity: 0 !important;
-                pointer-events: none !important;
-                height: 0 !important;
-                min-height: 0 !important;
-                max-height: 0 !important;
-                overflow: hidden !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                border: 0 !important;
-              }
-            }
-          `}</style>
-          {/* FORCE_REMOVE_MOBILE_NAV_END */}
-</header>
+      </header>
       {/* MBNT_REMOVE_MOBILE_MENU_START */}
       <style jsx global>{`
         @media (max-width: 767px) {
