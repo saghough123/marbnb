@@ -114,3 +114,21 @@ body {
   }
 }
 /* MBNT_FINAL_FAKE_MENU_CROP_END */
+
+/* MBNT_FAKE_MENU_FINAL_POSITION_START */
+@media (max-width: 767px) {
+  .mbnb-hero-bg {
+    object-position: center 68% !important;
+    transform: scale(1.10) translateY(35px) !important;
+    transform-origin: center bottom !important;
+  }
+
+  .mbnb-fake-menu-mask {
+    display: block !important;
+    height: 175px !important;
+    background: #fff8ec !important;
+    z-index: 20 !important;
+    pointer-events: none !important;
+  }
+}
+/* MBNT_FAKE_MENU_FINAL_POSITION_END */

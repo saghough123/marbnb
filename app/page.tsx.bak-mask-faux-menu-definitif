@@ -172,11 +172,11 @@ export default function Home() {
      <div className="absolute inset-0">
       <img src="/porte-marocaine.png" alt="Porte traditionnelle marocaine" className="mbnb-hero-bg h-full w-full object-cover object-bottom md:object-center" />
       <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/35 to-black/10" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#f4ead7] via-transparent to-black/20" />
             {/* MBNT_HIDE_FAKE_MENU_IN_IMAGE */}
-            <div className="mbnb-fake-menu-mask absolute inset-x-0 top-0 z-20 h-[175px] bg-[#fff8ec] md:hidden" />
+            <div className="mbnb-fake-menu-mask absolute inset-x-0 top-0 h-[125px] bg-[#f4ead7] md:hidden" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#f4ead7] via-transparent to-black/20" />
      </div>
-     <div className="relative z-30 mx-auto flex min-h-[720px] max-w-7xl items-center px-4 pb-16 pt-[175px] md:py-16">
+     <div className="relative mx-auto flex min-h-[720px] max-w-7xl items-center px-4 pb-16 pt-[135px] md:py-16">
       <div className="max-w-2xl rounded-[2rem] border border-white/20 bg-black/35 p-6 text-white shadow-2xl backdrop-blur-sm md:p-8">
        <p className="inline-flex rounded-full border border-white/30 bg-white/15 px-4 py-2 text-sm font-black text-white backdrop-blur">🇲🇦 Mbnb · Séjours authentiques au Maroc</p>
        <h2 className="mt-6 text-5xl font-black leading-tight drop-shadow md:text-7xl">Bienvenue au Maroc.</h2>
