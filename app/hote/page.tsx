@@ -1,9 +1,11 @@
+
 "use client";
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
 const types = ["Appartement", "Studio", "Villa", "Riad", "Maison", "Autre"];
+const MAX_PHOTOS = 6;
 
 type FormState = {
   nom: string;
@@ -17,7 +19,7 @@ type FormState = {
   voyageurs: string;
   description: string;
   photos: string;
-  file: File | null;
+  files: File[];
 };
 
 const initialForm: FormState = {
@@ -32,14 +34,14 @@ const initialForm: FormState = {
   voyageurs: "2",
   description: "",
   photos: "",
-  file: null,
+  files: [],
 };
 
 function slugify(value: string) {
   return value
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)+/g, "") || "photo";
 }
@@ -48,16 +50,26 @@ export default function HotePage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [form, setForm] = useState<FormState>(initialForm);
-  const [preview, setPreview] = useState("");
+  const [previews, setPreviews] = useState<string[]>([]);
 
-  function updateField(name: keyof FormState, value: string | File | null) {
+  function updateField(name: keyof FormState, value: string | File[]) {
     setForm((old) => ({ ...old, [name]: value }));
   }
 
-  function choisirPhoto(file: File | null) {
-    updateField("file", file);
-    if (preview) URL.revokeObjectURL(preview);
-    setPreview(file ? URL.createObjectURL(file) : "");
+  function choisirPhotos(fileList: FileList | null) {
+    previews.forEach((url) => URL.revokeObjectURL(url));
+    const selected = Array.from(fileList || [])
+      .filter((file) => file.type.startsWith("image/"))
+      .slice(0, MAX_PHOTOS);
+
+    updateField("files", selected);
+    setPreviews(selected.map((file) => URL.createObjectURL(file)));
+
+    if ((fileList?.length || 0) > MAX_PHOTOS) {
+      setMessage(`Maximum ${MAX_PHOTOS} photos. Les premières photos ont été gardées.`);
+    } else {
+      setMessage("");
+    }
   }
 
   async function envoyerDemande(e: React.FormEvent) {
@@ -70,18 +82,19 @@ export default function HotePage() {
     }
 
     setLoading(true);
-    let imageUrl = "";
+    const imageUrls: string[] = [];
 
-    if (form.file) {
-      const extension = form.file.name.split(".").pop() || "jpg";
-      const fileName = `${Date.now()}-${slugify(form.titre)}.${extension}`;
+    for (let i = 0; i < form.files.length; i++) {
+      const file = form.files[i];
+      const extension = file.name.split(".").pop() || "jpg";
+      const fileName = `${Date.now()}-${i + 1}-${slugify(form.titre)}.${extension}`;
 
       const { error: uploadError } = await supabase.storage
         .from("logements")
-        .upload(fileName, form.file, {
+        .upload(fileName, file, {
           cacheControl: "3600",
           upsert: false,
-          contentType: form.file.type,
+          contentType: file.type,
         });
 
       if (uploadError) {
@@ -91,7 +104,7 @@ export default function HotePage() {
       }
 
       const { data } = supabase.storage.from("logements").getPublicUrl(fileName);
-      imageUrl = data.publicUrl;
+      imageUrls.push(data.publicUrl);
     }
 
     const { error } = await supabase.from("demandes_hotes").insert({
@@ -105,7 +118,7 @@ export default function HotePage() {
       chambres: Number(form.chambres) || 1,
       voyageurs: Number(form.voyageurs) || 1,
       description: form.description.trim(),
-      photos: imageUrl,
+      photos: JSON.stringify(imageUrls),
       statut: "En attente",
     });
 
@@ -116,93 +129,53 @@ export default function HotePage() {
       return;
     }
 
-    setMessage("Demande envoyée avec succès ✅ Elle est maintenant visible dans l’espace Admin.");
+    setMessage("Demande envoyée avec succès ✅ Les photos sont visibles dans l’espace Admin.");
     setForm(initialForm);
-    if (preview) URL.revokeObjectURL(preview);
-    setPreview("");
+    previews.forEach((url) => URL.revokeObjectURL(url));
+    setPreviews([]);
   }
 
   return (
     <main className="min-h-screen bg-[#f4ead7] px-4 py-8 text-[#1e1b18]">
       <div className="mx-auto max-w-4xl">
         <a href="/" className="text-sm font-black text-[#c1121f]">← Retour accueil</a>
-
         <section className="mt-5 rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3] md:p-8">
           <p className="font-black text-[#c1121f]">Devenir hôte Mbnb</p>
           <h1 className="mt-2 text-4xl font-black">Mettre mon logement</h1>
-          <p className="mt-3 text-[#7a6446]">
-            Remplis les informations du logement. La demande sera enregistrée dans Supabase avec le statut “En attente”.
-          </p>
+          <p className="mt-3 text-[#7a6446]">Ajoute les informations du logement et jusqu’à {MAX_PHOTOS} photos. Les photos seront uploadées dans Supabase Storage.</p>
 
           <form onSubmit={envoyerDemande} className="mt-8 grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="text-xs font-black text-[#7a3d14]">Nom</label>
-              <input value={form.nom} onChange={(e) => updateField("nom", e.target.value)} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" />
-            </div>
-
-            <div>
-              <label className="text-xs font-black text-[#7a3d14]">Téléphone</label>
-              <input value={form.telephone} onChange={(e) => updateField("telephone", e.target.value)} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" />
-            </div>
-
-            <div>
-              <label className="text-xs font-black text-[#7a3d14]">Ville</label>
-              <input value={form.ville} onChange={(e) => updateField("ville", e.target.value)} placeholder="Casablanca, Marrakech..." className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" />
-            </div>
-
-            <div>
-              <label className="text-xs font-black text-[#7a3d14]">Quartier</label>
-              <input value={form.quartier} onChange={(e) => updateField("quartier", e.target.value)} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" />
-            </div>
-
-            <div>
-              <label className="text-xs font-black text-[#7a3d14]">Type</label>
-              <select value={form.type_logement} onChange={(e) => updateField("type_logement", e.target.value)} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none">
-                {types.map((t) => <option key={t}>{t}</option>)}
-              </select>
-            </div>
-
-            <div>
-              <label className="text-xs font-black text-[#7a3d14]">Titre de l’annonce</label>
-              <input value={form.titre} onChange={(e) => updateField("titre", e.target.value)} placeholder="Appartement moderne Maarif" className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" />
-            </div>
-
-            <div>
-              <label className="text-xs font-black text-[#7a3d14]">Prix / nuit MAD</label>
-              <input type="number" value={form.prix} onChange={(e) => updateField("prix", e.target.value)} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" />
-            </div>
+            <div><label className="text-xs font-black text-[#7a3d14]">Nom</label><input value={form.nom} onChange={(e) => updateField("nom", e.target.value)} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" /></div>
+            <div><label className="text-xs font-black text-[#7a3d14]">Téléphone</label><input value={form.telephone} onChange={(e) => updateField("telephone", e.target.value)} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" /></div>
+            <div><label className="text-xs font-black text-[#7a3d14]">Ville</label><input value={form.ville} onChange={(e) => updateField("ville", e.target.value)} placeholder="Casablanca, Marrakech..." className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" /></div>
+            <div><label className="text-xs font-black text-[#7a3d14]">Quartier</label><input value={form.quartier} onChange={(e) => updateField("quartier", e.target.value)} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" /></div>
+            <div><label className="text-xs font-black text-[#7a3d14]">Type</label><select value={form.type_logement} onChange={(e) => updateField("type_logement", e.target.value)} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none">{types.map((t) => <option key={t}>{t}</option>)}</select></div>
+            <div><label className="text-xs font-black text-[#7a3d14]">Titre de l’annonce</label><input value={form.titre} onChange={(e) => updateField("titre", e.target.value)} placeholder="Appartement moderne Maarif" className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" /></div>
+            <div><label className="text-xs font-black text-[#7a3d14]">Prix / nuit MAD</label><input type="number" value={form.prix} onChange={(e) => updateField("prix", e.target.value)} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" /></div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-black text-[#7a3d14]">Chambres</label>
-                <input type="number" min={1} value={form.chambres} onChange={(e) => updateField("chambres", e.target.value)} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" />
-              </div>
-              <div>
-                <label className="text-xs font-black text-[#7a3d14]">Voyageurs</label>
-                <input type="number" min={1} value={form.voyageurs} onChange={(e) => updateField("voyageurs", e.target.value)} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" />
-              </div>
+              <div><label className="text-xs font-black text-[#7a3d14]">Chambres</label><input type="number" min={1} value={form.chambres} onChange={(e) => updateField("chambres", e.target.value)} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" /></div>
+              <div><label className="text-xs font-black text-[#7a3d14]">Voyageurs</label><input type="number" min={1} value={form.voyageurs} onChange={(e) => updateField("voyageurs", e.target.value)} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" /></div>
             </div>
 
             <div className="md:col-span-2">
-              <label className="text-xs font-black text-[#7a3d14]">Photo principale</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => choisirPhoto(e.target.files?.[0] || null)}
-                className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none"
-              />
-              <p className="mt-1 text-xs text-[#7a6446]">Choisis une photo depuis ton PC/téléphone. Elle sera envoyée automatiquement dans Supabase Storage.</p>
-              {preview && <img src={preview} alt="Aperçu photo" className="mt-4 h-56 w-full rounded-2xl object-cover ring-1 ring-[#e5d3b3]" />}
+              <label className="text-xs font-black text-[#7a3d14]">Photos du logement</label>
+              <input type="file" accept="image/*" multiple onChange={(e) => choisirPhotos(e.target.files)} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" />
+              <p className="mt-1 text-xs text-[#7a6446]">Tu peux choisir jusqu’à {MAX_PHOTOS} photos. La première photo deviendra la photo principale.</p>
+              {previews.length > 0 && (
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+                  {previews.map((url, index) => (
+                    <div key={url} className="relative overflow-hidden rounded-2xl ring-1 ring-[#e5d3b3]">
+                      <img src={url} alt={`Aperçu photo ${index + 1}`} className="h-40 w-full object-cover" />
+                      {index === 0 && <span className="absolute left-2 top-2 rounded-full bg-[#fff8ec]/95 px-3 py-1 text-xs font-black text-[#7a3d14]">Principale</span>}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
-            <div className="md:col-span-2">
-              <label className="text-xs font-black text-[#7a3d14]">Description</label>
-              <textarea value={form.description} onChange={(e) => updateField("description", e.target.value)} rows={5} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" />
-            </div>
-
-            <button disabled={loading} className="rounded-2xl bg-[#0f2f22] px-6 py-4 font-black text-white disabled:opacity-60 md:col-span-2">
-              {loading ? "Envoi en cours..." : "Envoyer ma demande"}
-            </button>
+            <div className="md:col-span-2"><label className="text-xs font-black text-[#7a3d14]">Description</label><textarea value={form.description} onChange={(e) => updateField("description", e.target.value)} rows={5} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" /></div>
+            <button disabled={loading} className="rounded-2xl bg-[#0f2f22] px-6 py-4 font-black text-white disabled:opacity-60 md:col-span-2">{loading ? "Envoi en cours..." : "Envoyer ma demande"}</button>
           </form>
 
           {message && <p className="mt-5 rounded-2xl bg-green-50 p-4 font-bold text-green-800">{message}</p>}

@@ -20,16 +20,6 @@ type Demande = {
   created_at: string | null;
 };
 
-function parsePhotos(value: string | null) {
-  if (!value) return [] as string[];
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed.filter(Boolean) : [value];
-  } catch {
-    return value ? [value] : [];
-  }
-}
-
 export default function AdminDemandesPage() {
   const [autorise, setAutorise] = useState(false);
   const [verificationAdmin, setVerificationAdmin] = useState(true);
@@ -85,7 +75,7 @@ export default function AdminDemandesPage() {
       chambres: Number(d.chambres || 1),
       voyageurs: Number(d.voyageurs || 1),
       description: d.description || "",
-      image_url: parsePhotos(d.photos)[0] || "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=900&auto=format&fit=crop&q=80",
+      image_url: d.photos || "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=900&auto=format&fit=crop&q=80",
       statut: "Actif",
     });
     if (insertError) {
@@ -122,7 +112,7 @@ export default function AdminDemandesPage() {
           <div className="mt-6 grid gap-5">
             {demandes.map((d) => (
               <article key={d.id} className="grid gap-4 rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-[#e5d3b3] md:grid-cols-[220px_1fr]">
-                <div>{parsePhotos(d.photos).length > 0 ? <div className="grid gap-2"><img src={parsePhotos(d.photos)[0]} alt={d.titre || "Logement"} className="h-44 w-full rounded-2xl object-cover" />{parsePhotos(d.photos).length > 1 && <div className="grid grid-cols-3 gap-2">{parsePhotos(d.photos).slice(1, 4).map((photo) => <img key={photo} src={photo} alt="Photo logement" className="h-16 w-full rounded-xl object-cover" />)}</div>}</div> : <div className="grid h-44 place-items-center rounded-2xl bg-[#f4ead7] text-sm font-bold text-[#7a6446]">Pas de photo</div>}</div>
+                <div>{d.photos ? <img src={d.photos} alt={d.titre || "Logement"} className="h-44 w-full rounded-2xl object-cover" /> : <div className="grid h-44 place-items-center rounded-2xl bg-[#f4ead7] text-sm font-bold text-[#7a6446]">Pas de photo</div>}</div>
                 <div>
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div><h2 className="text-2xl font-black">{d.titre || "Sans titre"}</h2><p className="text-sm text-[#7a6446]">{d.type_logement} · {d.quartier}, {d.ville}</p></div>
