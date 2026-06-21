@@ -100,7 +100,7 @@ export default function AdminLogementsPage() {
     <main className="min-h-screen bg-[#f4ead7] px-4 py-8 text-[#1e1b18]">
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div><a href="/admin-demandes" className="text-sm font-black text-[#c1121f]">← Demandes hôtes</a><a href="/admin-dashboard" className="ml-3 text-sm font-black text-[#7a3d14]">Dashboard</a></div>
+          <a href="/admin-demandes" className="text-sm font-black text-[#c1121f]">← Demandes hôtes</a>
           <div className="flex flex-wrap gap-2">
             <a href="/resultats" className="rounded-full bg-[#0f2f22] px-5 py-2 text-sm font-black text-white">Voir résultats</a>
             <button onClick={deconnexion} className="rounded-full bg-red-700 px-5 py-2 text-sm font-black text-white">Déconnexion</button>

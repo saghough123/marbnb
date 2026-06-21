@@ -1,0 +1,177 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
+
+type Demande = {
+  id: number;
+  statut: string | null;
+  created_at: string | null;
+};
+
+type Logement = {
+  id: number;
+  statut: string | null;
+  prix: number | null;
+};
+
+type Reservation = {
+  id: number;
+  logement_titre: string | null;
+  ville: string | null;
+  arrivee: string | null;
+  depart: string | null;
+  voyageurs: number | null;
+  paiement: string | null;
+  devise: string | null;
+  total: number | null;
+  statut: string | null;
+  created_at: string | null;
+};
+
+function formatMad(value: number) {
+  return new Intl.NumberFormat("fr-MA", { maximumFractionDigits: 0 }).format(value) + " MAD";
+}
+
+function todayISO() {
+  const d = new Date();
+  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+}
+
+export default function AdminDashboardPage() {
+  const [autorise, setAutorise] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [demandes, setDemandes] = useState<Demande[]>([]);
+  const [logements, setLogements] = useState<Logement[]>([]);
+  const [reservations, setReservations] = useState<Reservation[]>([]);
+
+  useEffect(() => {
+    const ok = localStorage.getItem("mbnb_admin_ok") === "true";
+    if (!ok) {
+      window.location.href = "/admin-login";
+      return;
+    }
+    setAutorise(true);
+    chargerDashboard();
+  }, []);
+
+  async function chargerDashboard() {
+    setLoading(true);
+    setMessage("");
+
+    const [demandesRes, logementsRes, reservationsRes] = await Promise.all([
+      supabase.from("demandes_hotes").select("id,statut,created_at"),
+      supabase.from("logements").select("id,statut,prix"),
+      supabase.from("reservations").select("id,logement_titre,ville,arrivee,depart,voyageurs,paiement,devise,total,statut,created_at").order("created_at", { ascending: false }),
+    ]);
+
+    const errors = [demandesRes.error, logementsRes.error, reservationsRes.error].filter(Boolean);
+    if (errors.length > 0) {
+      setMessage("Erreur Supabase : " + errors.map((e) => e?.message).join(" | "));
+    }
+
+    setDemandes(demandesRes.data || []);
+    setLogements(logementsRes.data || []);
+    setReservations(reservationsRes.data || []);
+    setLoading(false);
+  }
+
+  function deconnexion() {
+    localStorage.removeItem("mbnb_admin_ok");
+    window.location.href = "/admin-login";
+  }
+
+  const stats = useMemo(() => {
+    const demandesEnAttente = demandes.filter((d) => (d.statut || "").toLowerCase().includes("attente")).length;
+    const logementsActifs = logements.filter((l) => (l.statut || "Actif") === "Actif").length;
+    const logementsMasques = logements.filter((l) => (l.statut || "") === "Masqué").length;
+    const totalReservations = reservations.length;
+    const caMad = reservations.reduce((sum, r) => sum + Number(r.total || 0), 0);
+    const today = todayISO();
+    const arriveesAujourdhui = reservations.filter((r) => r.arrivee === today).length;
+    return { demandesEnAttente, logementsActifs, logementsMasques, totalReservations, caMad, arriveesAujourdhui };
+  }, [demandes, logements, reservations]);
+
+  const recentes = reservations.slice(0, 8);
+
+  if (!autorise) {
+    return <main className="min-h-screen bg-[#f4ead7] p-8 font-black">Vérification accès admin...</main>;
+  }
+
+  return (
+    <main className="min-h-screen bg-[#f4ead7] px-4 py-8 text-[#1e1b18]">
+      <div className="mx-auto max-w-7xl">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <a href="/" className="text-sm font-black text-[#c1121f]">← Accueil</a>
+          <div className="flex flex-wrap gap-2">
+            <a href="/admin-demandes" className="rounded-full bg-[#0f2f22] px-5 py-2 text-sm font-black text-white">Demandes</a>
+            <a href="/admin-logements" className="rounded-full bg-[#7a3d14] px-5 py-2 text-sm font-black text-white">Logements</a>
+            <button onClick={chargerDashboard} className="rounded-full bg-white px-5 py-2 text-sm font-black text-[#7a3d14] ring-1 ring-[#e5d3b3]">Actualiser</button>
+            <button onClick={deconnexion} className="rounded-full bg-red-700 px-5 py-2 text-sm font-black text-white">Déconnexion</button>
+          </div>
+        </div>
+
+        <section className="mt-5 rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3]">
+          <p className="font-black text-[#c1121f]">Admin Mbnb</p>
+          <h1 className="mt-2 text-4xl font-black">Tableau de bord</h1>
+          <p className="mt-3 text-[#7a6446]">Vue rapide des demandes, logements et réservations.</p>
+
+          {message && <p className="mt-4 rounded-2xl bg-red-50 p-4 font-bold text-red-700">{message}</p>}
+          {loading && <p className="mt-6 font-bold">Chargement...</p>}
+
+          {!loading && (
+            <>
+              <div className="mt-6 grid gap-4 md:grid-cols-3 lg:grid-cols-6">
+                <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Demandes en attente</p><p className="mt-2 text-3xl font-black">{stats.demandesEnAttente}</p></div>
+                <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Logements actifs</p><p className="mt-2 text-3xl font-black">{stats.logementsActifs}</p></div>
+                <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Logements masqués</p><p className="mt-2 text-3xl font-black">{stats.logementsMasques}</p></div>
+                <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Réservations</p><p className="mt-2 text-3xl font-black">{stats.totalReservations}</p></div>
+                <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">CA estimé</p><p className="mt-2 text-2xl font-black">{formatMad(stats.caMad)}</p></div>
+                <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Arrivées aujourd’hui</p><p className="mt-2 text-3xl font-black">{stats.arriveesAujourdhui}</p></div>
+              </div>
+
+              <div className="mt-8 rounded-[2rem] bg-white p-5 ring-1 ring-[#e5d3b3]">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="text-2xl font-black">Dernières réservations</h2>
+                  <a href="/resultats" className="rounded-full bg-[#f4ead7] px-4 py-2 text-sm font-black text-[#7a3d14]">Voir le site</a>
+                </div>
+
+                <div className="mt-5 overflow-x-auto">
+                  <table className="w-full min-w-[760px] text-left text-sm">
+                    <thead>
+                      <tr className="border-b text-[#7a6446]">
+                        <th className="py-3">Logement</th>
+                        <th className="py-3">Ville</th>
+                        <th className="py-3">Dates</th>
+                        <th className="py-3">Voyageurs</th>
+                        <th className="py-3">Paiement</th>
+                        <th className="py-3">Total</th>
+                        <th className="py-3">Statut</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {recentes.map((r) => (
+                        <tr key={r.id} className="border-b last:border-0">
+                          <td className="py-3 font-bold">{r.logement_titre || "-"}</td>
+                          <td className="py-3">{r.ville || "-"}</td>
+                          <td className="py-3">{r.arrivee || "-"} → {r.depart || "-"}</td>
+                          <td className="py-3">{r.voyageurs || 1}</td>
+                          <td className="py-3">{r.paiement || "-"}</td>
+                          <td className="py-3 font-black">{formatMad(Number(r.total || 0))}</td>
+                          <td className="py-3"><span className="rounded-full bg-[#f4ead7] px-3 py-1 text-xs font-black text-[#7a3d14]">{r.statut || "-"}</span></td>
+                        </tr>
+                      ))}
+                      {recentes.length === 0 && <tr><td colSpan={7} className="py-6 text-center font-bold text-[#7a6446]">Aucune réservation pour le moment.</td></tr>}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
+        </section>
+      </div>
+    </main>
+  );
+}
