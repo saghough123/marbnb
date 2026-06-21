@@ -73,13 +73,6 @@ export default function LogementDetailPage() {
   const [heureArrivee, setHeureArrivee] = useState("");
   const [clientMessage, setClientMessage] = useState("");
   const [saving, setSaving] = useState(false);
-  const [checkingDisponibilite, setCheckingDisponibilite] = useState(false);
-  const [disponibiliteVerifiee, setDisponibiliteVerifiee] = useState(false);
-
-  useEffect(() => {
-    // reset disponibilité
-    setDisponibiliteVerifiee(false);
-  }, [arrivee, depart, voyageurs]);
 
   useEffect(() => {
     async function charger() {
@@ -131,37 +124,9 @@ export default function LogementDetailPage() {
   const frais = paiement === "espece" ? Math.round(sousTotal * 0.05) : 0;
   const total = sousTotal + frais;
 
-
-  async function verifierDisponibilite() {
-    if (!logement) return;
-    setMessage("");
-    setCheckingDisponibilite(true);
-    const { data, error } = await supabase.from("reservations").select("*").eq("logement_id", logement.id);
-    setCheckingDisponibilite(false);
-    if (error) { setMessage("Impossible de vérifier les disponibilités : " + error.message); return; }
-    const start = new Date(arrivee).getTime();
-    const end = new Date(depart).getTime();
-    const conflit = (data || []).some((r: any) => {
-      const statut = String(r.statut || r.status || "").toLowerCase();
-      if (statut.includes("annul")) return false;
-      const rStart = new Date(r.arrivee || r.date_arrivee || r.checkin || r.check_in || "").getTime();
-      const rEnd = new Date(r.depart || r.date_depart || r.checkout || r.check_out || "").getTime();
-      if (Number.isNaN(rStart) || Number.isNaN(rEnd)) return false;
-      return start < rEnd && end > rStart;
-    });
-    if (conflit) { setDisponibiliteVerifiee(false); setMessage("Ce logement n’est pas disponible sur ces dates. Essayez une autre période."); return; }
-    setDisponibiliteVerifiee(true);
-    setMessage("Disponible ✅ Vous pouvez confirmer la réservation.");
-  }
-
   async function reserver() {
     if (!logement) return;
     setMessage("");
-
-    if (!disponibiliteVerifiee) {
-      setMessage("Veuillez d’abord vérifier les disponibilités avant de confirmer.");
-      return;
-    }
 
     if (!clientNom.trim() || !clientTelephone.trim()) {
       setMessage("Merci de renseigner votre nom et téléphone avant de réserver.");
@@ -295,8 +260,7 @@ export default function LogementDetailPage() {
             </div>
 
             {message && <p className="mt-4 rounded-2xl bg-amber-50 p-3 text-sm font-bold text-amber-700">{message}</p>}
-            <button onClick={verifierDisponibilite} disabled={checkingDisponibilite} className="mt-5 w-full rounded-2xl bg-[#0f2f22] px-6 py-4 font-black text-white disabled:opacity-60">{checkingDisponibilite ? "Vérification..." : disponibiliteVerifiee ? "Disponibilité vérifiée ✅" : "Vérifier les disponibilités"}</button>
-            <button onClick={reserver} disabled={saving || !disponibiliteVerifiee} className="mt-3 w-full rounded-2xl bg-[#c1121f] px-6 py-4 font-black text-white disabled:opacity-50">{saving ? "Enregistrement..." : "Confirmer la réservation"}</button>
+            <button onClick={reserver} disabled={saving} className="mt-5 w-full rounded-2xl bg-[#c1121f] px-6 py-4 font-black text-white disabled:opacity-60">{saving ? "Enregistrement..." : "Confirmer la réservation"}</button>
           </aside>
         </div>
       </section>
