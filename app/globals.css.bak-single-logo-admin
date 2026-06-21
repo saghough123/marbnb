@@ -201,14 +201,3 @@ input:focus, select:focus, textarea:focus {
   }
 }
 /* MBNB_CATALOGUE_POLISH_END */
-
-
-/* MBNB_HEADER_SINGLE_LOGO_FIX */
-header a[href="/admin-dashboard"] {
-  white-space: nowrap;
-}
-@media (max-width: 767px) {
-  header nav {
-    display: none !important;
-  }
-}
