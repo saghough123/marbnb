@@ -1,0 +1,89 @@
+"use client";
+
+type MbnbMapProps = {
+  ville?: string | null;
+  quartier?: string | null;
+  titre?: string | null;
+  className?: string;
+};
+
+const cityCoordinates: Record<string, { lat: number; lng: number; zoomLabel: string }> = {
+  casablanca: { lat: 33.5731, lng: -7.5898, zoomLabel: "Casablanca" },
+  marrakech: { lat: 31.6295, lng: -7.9811, zoomLabel: "Marrakech" },
+  marrakesh: { lat: 31.6295, lng: -7.9811, zoomLabel: "Marrakech" },
+  rabat: { lat: 34.0209, lng: -6.8416, zoomLabel: "Rabat" },
+  fes: { lat: 34.0181, lng: -5.0078, zoomLabel: "Fès" },
+  fès: { lat: 34.0181, lng: -5.0078, zoomLabel: "Fès" },
+  tanger: { lat: 35.7595, lng: -5.8340, zoomLabel: "Tanger" },
+  tangier: { lat: 35.7595, lng: -5.8340, zoomLabel: "Tanger" },
+  agadir: { lat: 30.4278, lng: -9.5981, zoomLabel: "Agadir" },
+  essaouira: { lat: 31.5085, lng: -9.7595, zoomLabel: "Essaouira" },
+  meknes: { lat: 33.8935, lng: -5.5473, zoomLabel: "Meknès" },
+  meknès: { lat: 33.8935, lng: -5.5473, zoomLabel: "Meknès" },
+  ouarzazate: { lat: 30.9335, lng: -6.9370, zoomLabel: "Ouarzazate" },
+  tetouan: { lat: 35.5785, lng: -5.3684, zoomLabel: "Tétouan" },
+  tétouan: { lat: 35.5785, lng: -5.3684, zoomLabel: "Tétouan" },
+};
+
+function normalize(value?: string | null) {
+  return (value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+function getCoordinates(ville?: string | null) {
+  const key = normalize(ville);
+  return cityCoordinates[key] || cityCoordinates.casablanca;
+}
+
+export default function MbnbMap({ ville, quartier, titre, className = "" }: MbnbMapProps) {
+  const coord = getCoordinates(ville);
+  const delta = 0.035;
+  const bbox = [
+    coord.lng - delta,
+    coord.lat - delta,
+    coord.lng + delta,
+    coord.lat + delta,
+  ].join("%2C");
+
+  const marker = `${coord.lat}%2C${coord.lng}`;
+  const src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${marker}`;
+  const openUrl = `https://www.openstreetmap.org/?mlat=${coord.lat}&mlon=${coord.lng}#map=14/${coord.lat}/${coord.lng}`;
+
+  return (
+    <section className={`rounded-[2rem] bg-[#fff8ec] p-5 shadow-sm ring-1 ring-[#e5d3b3] ${className}`}>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="font-black text-[#c1121f]">Localisation</p>
+          <h2 className="mt-1 text-2xl font-black">Autour du logement</h2>
+          <p className="mt-2 text-sm text-[#7a6446]">
+            {quartier ? `${quartier}, ` : ""}{ville || coord.zoomLabel}
+          </p>
+        </div>
+        <a
+          href={openUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="rounded-full bg-[#0f2f22] px-4 py-2 text-sm font-black text-white"
+        >
+          Ouvrir la carte
+        </a>
+      </div>
+
+      <div className="mt-4 overflow-hidden rounded-[1.5rem] ring-1 ring-[#e5d3b3]">
+        <iframe
+          title={`Carte ${titre || ville || "Mbnb"}`}
+          src={src}
+          className="h-[360px] w-full border-0"
+          loading="lazy"
+        />
+      </div>
+
+      <p className="mt-3 text-xs text-[#7a6446]">
+        La position est approximative et permet de visualiser le secteur du logement.
+      </p>
+    </section>
+  );
+}

@@ -4,7 +4,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import MbnbMap from "@/components/MbnbMap";
 
 type Logement = Record<string, any>;
 
@@ -224,9 +223,6 @@ export default function LogementDetailPage() {
               </div>
               <p className="mt-6 leading-8 text-[#5f4b32]">{description}</p>
             </section>
-
-
-            <MbnbMap ville={ville} quartier={quartier} titre={titre} className="mt-6" />
           </div>
 
           <aside className="h-fit rounded-[2rem] bg-[#fff8ec] p-5 shadow-sm ring-1 ring-[#e5d3b3]">
