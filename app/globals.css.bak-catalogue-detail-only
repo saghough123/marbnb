@@ -189,15 +189,3 @@ input:focus, select:focus, textarea:focus {
   .rounded-[2rem] { border-radius: 1.45rem !important; }
 }
 /* MBNB_POLISH_DESIGN_END */
-
-
-/* MBNB_CATALOGUE_POLISH_START */
-@media (max-width: 767px) {
-  a[href^="/logement/"] {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 44px;
-  }
-}
-/* MBNB_CATALOGUE_POLISH_END */
