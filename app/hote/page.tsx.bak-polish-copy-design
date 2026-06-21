@@ -125,7 +125,7 @@ export default function HotePage() {
     setLoading(false);
 
     if (error) {
-      setMessage("Erreur technique : " + error.message);
+      setMessage("Erreur Supabase : " + error.message);
       return;
     }
 
@@ -142,7 +142,7 @@ export default function HotePage() {
         <section className="mt-5 rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3] md:p-8">
           <p className="font-black text-[#c1121f]">Devenir hôte Mbnb</p>
           <h1 className="mt-2 text-4xl font-black">Mettre mon logement</h1>
-          <p className="mt-3 text-[#7a6446]">Ajoute les informations du logement et jusqu’à {MAX_PHOTOS} photos. Ajoutez de belles photos pour valoriser votre logement.</p>
+          <p className="mt-3 text-[#7a6446]">Ajoute les informations du logement et jusqu’à {MAX_PHOTOS} photos. Les photos seront uploadées dans Supabase Storage.</p>
 
           <form onSubmit={envoyerDemande} className="mt-8 grid gap-4 md:grid-cols-2">
             <div><label className="text-xs font-black text-[#7a3d14]">Nom</label><input value={form.nom} onChange={(e) => updateField("nom", e.target.value)} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" /></div>

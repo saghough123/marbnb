@@ -51,7 +51,7 @@ function dateAujourdhuiISO() {
 
 function nuitsEntre(a: string, d: string) {
   const diff = Math.round((new Date(d).getTime() - new Date(a).getTime()) / 86400000);
-  return diff > 0 ? diff : 1;
+  return diff > 0 ? diff : 0;
 }
 
 function prix(mad: number, devise: Devise) {
@@ -177,9 +177,9 @@ function ResultatsContent() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/35 to-[#f4ead7]" />
         </div>
         <div className="relative mx-auto max-w-7xl px-4 pb-10 pt-12 md:pb-16 md:pt-20">
-          <p className="inline-flex rounded-full border border-white/30 bg-white/20 px-4 py-2 text-sm font-bold text-white backdrop-blur">🇲🇦 Résultats Mbnb</p>
+          <p className="inline-flex rounded-full border border-white/30 bg-white/20 px-4 py-2 text-sm font-bold text-white backdrop-blur">🇲🇦 Résultats Mbnb · Données Supabase</p>
           <h1 className="mt-5 max-w-4xl text-5xl font-black tracking-tight text-white drop-shadow md:text-7xl">Choisissez votre séjour au Maroc.</h1>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-white/90">Découvrez une sélection de logements vérifiés pour votre séjour au Maroc.</p>
+          <p className="mt-4 max-w-2xl text-lg leading-8 text-white/90">Les logements affichés viennent maintenant de la vraie base de données Supabase.</p>
 
           <div className="mt-8 rounded-[2rem] border border-white/30 bg-[#fff8ec]/95 p-4 shadow-2xl">
             <div className="grid gap-3 md:grid-cols-[1.4fr_1fr_1fr_0.8fr_auto]">
@@ -226,7 +226,7 @@ function ResultatsContent() {
 
       <main className="mx-auto max-w-7xl px-4 py-8">
         {loading && <p className="rounded-[2rem] bg-[#fff8ec] p-6 text-center font-black ring-1 ring-[#e5d3b3]">Chargement des logements...</p>}
-        {erreur && <p className="rounded-[2rem] bg-red-50 p-6 text-center font-black text-red-700 ring-1 ring-red-100">Erreur technique : {erreur}</p>}
+        {erreur && <p className="rounded-[2rem] bg-red-50 p-6 text-center font-black text-red-700 ring-1 ring-red-100">Erreur Supabase : {erreur}</p>}
 
         {!loading && !erreur && (
           <section className="grid gap-6 lg:grid-cols-[1fr_370px]">

@@ -55,7 +55,7 @@ export default function AdminLogementsPage() {
       .order("id", { ascending: false });
 
     if (error) {
-      setMessage("Erreur technique : " + error.message);
+      setMessage("Erreur Supabase : " + error.message);
       setLogements([]);
     } else {
       setMessage("");

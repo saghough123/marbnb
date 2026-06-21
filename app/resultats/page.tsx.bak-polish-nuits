@@ -51,7 +51,7 @@ function dateAujourdhuiISO() {
 
 function nuitsEntre(a: string, d: string) {
   const diff = Math.round((new Date(d).getTime() - new Date(a).getTime()) / 86400000);
-  return diff > 0 ? diff : 1;
+  return diff > 0 ? diff : 0;
 }
 
 function prix(mad: number, devise: Devise) {

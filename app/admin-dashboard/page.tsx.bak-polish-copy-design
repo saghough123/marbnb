@@ -80,7 +80,7 @@ export default function AdminDashboardPage() {
 
     const errors = [demandesRes.error, logementsRes.error, reservationsRes.error].filter(Boolean);
     if (errors.length > 0) {
-      setMessage("Erreur technique : " + errors.map((e) => e?.message).join(" | "));
+      setMessage("Erreur Supabase : " + errors.map((e) => e?.message).join(" | "));
     }
 
     setDemandes(demandesRes.data || []);

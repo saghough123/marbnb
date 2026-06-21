@@ -55,7 +55,7 @@ export default function AdminReservationsPage() {
 
     const { data, error } = await supabase.from("reservations").select("*");
     if (error) {
-      setMessage("Erreur technique : " + error.message);
+      setMessage("Erreur Supabase : " + error.message);
       setReservations([]);
     } else {
       setReservations([...(data || [])].sort((a, b) => getDateValue(b) - getDateValue(a)));
