@@ -19,7 +19,6 @@ type Logement = {
   voyageurs: number | null;
   description: string | null;
   image_url: string | null;
-  photos: string | null;
   statut: string | null;
 };
 
@@ -81,7 +80,7 @@ function ResultatsContent() {
       setLoading(true);
       const { data, error } = await supabase
         .from("logements")
-        .select("id,titre,ville,quartier,type_logement,prix,chambres,voyageurs,description,image_url,photos,statut")
+        .select("id,titre,ville,quartier,type_logement,prix,chambres,voyageurs,description,image_url,statut")
         .eq("statut", "Actif")
         .order("id", { ascending: true });
 
@@ -224,22 +223,10 @@ function ResultatsContent() {
                   const prixSejour = prixNuit * nuits;
                   const frais = paiement === "espece" ? Math.round(prixSejour * 0.05) : 0;
                   const total = prixSejour + frais;
-                  const photosLogement = parsePhotos(l.photos).length > 0 ? parsePhotos(l.photos) : (l.image_url ? [l.image_url] : []);
                   return (
                     <div key={l.id} className="overflow-hidden rounded-[2rem] bg-[#fff8ec] shadow-sm ring-1 ring-[#e5d3b3] transition hover:-translate-y-1 hover:shadow-2xl">
                       <div className="relative">
-                        {photosLogement.length > 0 && (
-                          <div>
-                            <img src={photosLogement[0]} alt={l.titre} className="h-64 w-full object-cover" />
-                            {photosLogement.length > 1 && (
-                              <div className="absolute bottom-3 left-3 right-3 grid grid-cols-4 gap-2">
-                                {photosLogement.slice(1, 5).map((photo) => (
-                                  <img key={photo} src={photo} alt="Photo logement" className="h-14 w-full rounded-xl object-cover ring-2 ring-white/80" />
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        )}
+                        {l.image_url && <img src={l.image_url} alt={l.titre} className="h-64 w-full object-cover" />}
                         <span className="absolute left-3 top-3 rounded-full bg-[#fff8ec]/95 px-3 py-1 text-xs font-black text-[#7a3d14]">{l.type_logement}</span>
                       </div>
                       <div className="p-5">
@@ -274,16 +261,6 @@ function ResultatsContent() {
       </main>
     </div>
   );
-}
-
-function parsePhotos(value: string | null | undefined) {
-  if (!value) return [] as string[];
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed.filter(Boolean) : [value];
-  } catch {
-    return value ? [value] : [];
-  }
 }
 
 export default function ResultatsPage() {
