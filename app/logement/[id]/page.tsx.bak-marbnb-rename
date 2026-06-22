@@ -117,7 +117,7 @@ export default function LogementDetailPage() {
 
   const imageUrl = getValue(logement, ["image_url", "photo", "image"], "");
   const photos = useMemo(() => parsePhotos(getValue(logement, ["photos"], ""), imageUrl), [logement, imageUrl]);
-  const titre = getValue(logement, ["titre", "title", "nom"], "Logement Marbnb");
+  const titre = getValue(logement, ["titre", "title", "nom"], "Logement Mbnb");
   const ville = getValue(logement, ["ville", "city"], "Maroc");
   const quartier = getValue(logement, ["quartier", "district"], "");
   const type = getValue(logement, ["type_logement", "type"], "Logement");

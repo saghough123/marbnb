@@ -8,7 +8,7 @@ type Account = { email?: string; nom?: string; role?: string };
 function getAccount(): Account | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = localStorage.getItem("marbnb_account") || localStorage.getItem("mbnb_account");
+    const raw = localStorage.getItem("mbnb_account");
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
@@ -23,11 +23,9 @@ export default function MbnbHeader() {
     const refresh = () => setAccount(getAccount());
     refresh();
     window.addEventListener("storage", refresh);
-    window.addEventListener("marbnb:account-changed", refresh);
     window.addEventListener("mbnb:account-changed", refresh);
     return () => {
       window.removeEventListener("storage", refresh);
-      window.removeEventListener("marbnb:account-changed", refresh);
       window.removeEventListener("mbnb:account-changed", refresh);
     };
   }, []);
@@ -35,9 +33,8 @@ export default function MbnbHeader() {
   if (pathname?.startsWith("/admin-login")) return null;
 
   function logout() {
-    localStorage.removeItem("marbnb_account");
     localStorage.removeItem("mbnb_account");
-    window.dispatchEvent(new Event("marbnb:account-changed"));
+    window.dispatchEvent(new Event("mbnb:account-changed"));
     window.location.href = "/";
   }
 
@@ -46,11 +43,11 @@ export default function MbnbHeader() {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
         <a href="/" className="flex items-center gap-3">
           <span className="grid h-14 w-14 place-items-center overflow-hidden rounded-full bg-white ring-1 ring-[#e5d3b3] shadow-sm">
-            <img src="/marbnb-logo.png" alt="Logo Marbnb" className="h-12 w-12 object-contain" />
+            <img src="/mbnb-logo.png" alt="Logo Mbnb" className="h-12 w-12 object-contain" />
           </span>
           <span className="leading-tight">
-            <span className="block text-2xl font-black tracking-tight text-[#0f2f22]"><span className="text-[#c1121f]">Mar</span>bnb</span>
-            <span className="hidden text-xs font-bold text-[#7a6446] sm:block">Experience Maroc</span>
+            <span className="block text-2xl font-black tracking-tight text-[#0f2f22]"><span className="text-[#c1121f]">M</span>bnb</span>
+            <span className="hidden text-xs font-bold text-[#7a6446] sm:block">Séjours authentiques au Maroc</span>
           </span>
         </a>
 

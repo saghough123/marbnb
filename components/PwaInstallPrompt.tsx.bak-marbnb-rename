@@ -24,7 +24,7 @@ export default function PwaInstallPrompt() {
 
     if (isStandalone()) return;
 
-    const dismissed = localStorage.getItem("marbnb_pwa_dismissed") === "true";
+    const dismissed = localStorage.getItem("mbnb_pwa_dismissed") === "true";
     if (!dismissed) setVisible(true);
 
     const handler = (event: Event) => {
@@ -46,7 +46,7 @@ export default function PwaInstallPrompt() {
   }
 
   function close() {
-    localStorage.setItem("marbnb_pwa_dismissed", "true");
+    localStorage.setItem("mbnb_pwa_dismissed", "true");
     setVisible(false);
   }
 
@@ -55,13 +55,13 @@ export default function PwaInstallPrompt() {
   return (
     <div className="fixed bottom-4 left-4 right-4 z-[80] mx-auto max-w-xl rounded-[1.5rem] bg-[#fff8ec] p-4 shadow-2xl ring-1 ring-[#e5d3b3] md:left-auto md:right-5 md:w-[420px]">
       <div className="flex gap-3">
-        <img src="/marbnb-logo.png" alt="Logo Marbnb" className="h-12 w-12 rounded-xl object-contain" />
+        <img src="/mbnb-logo.png" alt="Logo Mbnb" className="h-12 w-12 rounded-xl object-contain" />
         <div className="flex-1">
-          <p className="font-black text-[#0f2f22]">Installer l’application Marbnb</p>
+          <p className="font-black text-[#0f2f22]">Installer l’application Mbnb</p>
           {isIos ? (
             <p className="mt-1 text-sm text-[#7a6446]">Sur iPhone : touchez Partager puis “Ajouter à l’écran d’accueil”.</p>
           ) : (
-            <p className="mt-1 text-sm text-[#7a6446]">Ajoutez Marbnb sur votre écran d’accueil comme une application.</p>
+            <p className="mt-1 text-sm text-[#7a6446]">Ajoutez Mbnb sur votre écran d’accueil comme une application.</p>
           )}
           <div className="mt-3 flex flex-wrap gap-2">
             {!isIos && deferredPrompt && <button onClick={install} className="rounded-full bg-[#0f2f22] px-4 py-2 text-sm font-black text-white">Installer</button>}

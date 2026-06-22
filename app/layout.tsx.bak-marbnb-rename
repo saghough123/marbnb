@@ -1,6 +1,6 @@
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import PwaInstallPrompt from "@/components/PwaInstallPrompt";
-import MarbnbHeader from "@/components/MarbnbHeader";
+import MbnbHeader from "@/components/MbnbHeader";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -16,11 +16,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Marbnb – Experience Maroc",
-  description: "Marbnb – Experience Maroc, séjours authentiques au Maroc",
+  title: "Mbnb",
+  description: "Mbnb - Séjours authentiques au Maroc",
   manifest: "/manifest.webmanifest",
   themeColor: "#0f2f22",
-  appleWebApp: { capable: true, title: "Marbnb", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: "Mbnb", statusBarStyle: "default" },
 };
 
 export default function RootLayout({
@@ -33,7 +33,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col"><MarbnbHeader />
+      <body className="min-h-full flex flex-col"><MbnbHeader />
         <ServiceWorkerRegister />
         {children}
         <PwaInstallPrompt /></body>

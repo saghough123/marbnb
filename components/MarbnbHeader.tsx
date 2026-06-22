@@ -15,7 +15,7 @@ function getAccount(): Account | null {
   }
 }
 
-export default function MbnbHeader() {
+export default function MarbnbHeader() {
   const pathname = usePathname();
   const [account, setAccount] = useState<Account | null>(null);
 

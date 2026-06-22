@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Marbnb – Experience Maroc",
-  description: "Marbnb – Experience Maroc, séjours authentiques au Maroc",
+  title: "Marbnb",
+  description: "Marbnb – Experience Maroc",
   manifest: "/manifest.webmanifest",
   themeColor: "#0f2f22",
   appleWebApp: { capable: true, title: "Marbnb", statusBarStyle: "default" },

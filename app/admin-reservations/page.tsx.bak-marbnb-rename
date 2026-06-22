@@ -40,7 +40,7 @@ export default function AdminReservationsPage() {
   const [filtre, setFiltre] = useState("Toutes");
 
   useEffect(() => {
-    const ok = localStorage.getItem("marbnb_admin_ok") === "true";
+    const ok = localStorage.getItem("mbnb_admin_ok") === "true";
     if (!ok) {
       window.location.href = "/admin-login";
       return;
@@ -87,7 +87,7 @@ export default function AdminReservationsPage() {
   }
 
   function deconnexion() {
-    localStorage.removeItem("marbnb_admin_ok");
+    localStorage.removeItem("mbnb_admin_ok");
     window.location.href = "/admin-login";
   }
 
@@ -116,7 +116,7 @@ export default function AdminReservationsPage() {
         </div>
 
         <section className="mt-5 rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3]">
-          <p className="font-black text-[#c1121f]">Admin Marbnb</p>
+          <p className="font-black text-[#c1121f]">Admin Mbnb</p>
           <h1 className="mt-2 text-4xl font-black">Gestion des réservations</h1>
           <p className="mt-3 text-[#7a6446]">Voir, confirmer, annuler ou supprimer les réservations.</p>
 

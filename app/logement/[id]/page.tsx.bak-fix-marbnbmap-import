@@ -4,7 +4,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import MbnbMap from "@/components/MbnbMap";
+import MarbnbMap from "@/components/MarbnbMap";
 
 type Logement = Record<string, any>;
 
@@ -261,7 +261,7 @@ export default function LogementDetailPage() {
             </section>
 
 
-            <MbnbMap ville={ville} quartier={quartier} titre={titre} className="mt-6" />
+            <MarbnbMap ville={ville} quartier={quartier} titre={titre} className="mt-6" />
           </div>
 
           <aside className="h-fit rounded-[2rem] bg-[#fff8ec] p-5 shadow-sm ring-1 ring-[#e5d3b3]">

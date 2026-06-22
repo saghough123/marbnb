@@ -1,7 +1,7 @@
 {
-  "name": "Mbnb - Séjours authentiques au Maroc",
-  "short_name": "Mbnb",
-  "description": "Réservez des logements authentiques au Maroc.",
+  "name": "Marbnb – Experience Maroc",
+  "short_name": "Marbnb",
+  "description": "Marbnb – Experience Maroc, séjours authentiques au Maroc.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -14,13 +14,13 @@
   ],
   "icons": [
     {
-      "src": "/mbnb-logo.png",
+      "src": "/marbnb-logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/mbnb-logo.png",
+      "src": "/marbnb-logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

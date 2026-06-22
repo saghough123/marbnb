@@ -1,6 +1,6 @@
 "use client";
 
-type MarbnbMapProps = {
+type MbnbMapProps = {
   ville?: string | null;
   quartier?: string | null;
   titre?: string | null;
@@ -38,7 +38,7 @@ function getCoordinates(ville?: string | null) {
   return cityCoordinates[key] || cityCoordinates.casablanca;
 }
 
-export default function MarbnbMap({ ville, quartier, titre, className = "" }: MarbnbMapProps) {
+export default function MbnbMap({ ville, quartier, titre, className = "" }: MbnbMapProps) {
   const coord = getCoordinates(ville);
   const delta = 0.035;
   const bbox = [
@@ -74,7 +74,7 @@ export default function MarbnbMap({ ville, quartier, titre, className = "" }: Ma
 
       <div className="mt-4 overflow-hidden rounded-[1.5rem] ring-1 ring-[#e5d3b3]">
         <iframe
-          title={`Carte ${titre || ville || "Marbnb"}`}
+          title={`Carte ${titre || ville || "Mbnb"}`}
           src={src}
           className="h-[360px] w-full border-0"
           loading="lazy"

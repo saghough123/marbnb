@@ -4,8 +4,8 @@ export default function InstallationPage() {
   return (
     <main className="min-h-screen bg-[#f4ead7] px-4 py-8 text-[#1e1b18]">
       <section className="mx-auto max-w-4xl rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3] md:p-8">
-        <p className="font-black text-[#c1121f]">Application Marbnb</p>
-        <h1 className="mt-2 text-4xl font-black">Installer Marbnb sur Android et iPhone</h1>
+        <p className="font-black text-[#c1121f]">Application Mbnb</p>
+        <h1 className="mt-2 text-4xl font-black">Installer Mbnb sur Android et iPhone</h1>
         <p className="mt-3 text-[#7a6446]">
           Cette version transforme le site en application installable. Le site reste le même : quand vous modifiez le site ou l’admin, l’application se met à jour automatiquement.
         </p>
@@ -14,7 +14,7 @@ export default function InstallationPage() {
           <div className="rounded-[2rem] bg-white p-5 ring-1 ring-[#e5d3b3]">
             <h2 className="text-2xl font-black">Android</h2>
             <ol className="mt-4 list-decimal space-y-2 pl-5 text-[#5f4b32]">
-              <li>Ouvrir Marbnb dans Chrome.</li>
+              <li>Ouvrir Mbnb dans Chrome.</li>
               <li>Appuyer sur le bouton “Installer” si le message apparaît.</li>
               <li>Sinon : menu ⋮ puis “Ajouter à l’écran d’accueil”.</li>
             </ol>
@@ -23,10 +23,10 @@ export default function InstallationPage() {
           <div className="rounded-[2rem] bg-white p-5 ring-1 ring-[#e5d3b3]">
             <h2 className="text-2xl font-black">iPhone</h2>
             <ol className="mt-4 list-decimal space-y-2 pl-5 text-[#5f4b32]">
-              <li>Ouvrir Marbnb dans Safari.</li>
+              <li>Ouvrir Mbnb dans Safari.</li>
               <li>Appuyer sur le bouton Partager.</li>
               <li>Choisir “Ajouter à l’écran d’accueil”.</li>
-              <li>Valider avec le nom “Marbnb”.</li>
+              <li>Valider avec le nom “Mbnb”.</li>
             </ol>
           </div>
         </div>

@@ -1,11 +1,11 @@
-const CACHE_NAME = "mbnb-cache-v1";
+const CACHE_NAME = "marbnb-cache-v1";
 const STATIC_ASSETS = [
   "/",
   "/resultats",
   "/favoris",
   "/compte",
   "/manifest.webmanifest",
-  "/mbnb-logo.png"
+  "/marbnb-logo.png"
 ];
 
 self.addEventListener("install", (event) => {

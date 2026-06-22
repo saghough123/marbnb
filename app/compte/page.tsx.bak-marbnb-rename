@@ -18,7 +18,7 @@ export default function ComptePage() {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem("marbnb_account");
+      const raw = localStorage.getItem("mbnb_account");
       if (raw) {
         const account = JSON.parse(raw);
         setNom(account.nom || "");
@@ -45,9 +45,9 @@ export default function ComptePage() {
       setLoading(false);
       if (error) { setMessage("Erreur création compte : " + error.message); return; }
       const account = { id: data.user?.id, nom: nom.trim(), email: email.trim(), telephone: telephone.trim(), role };
-      localStorage.setItem("marbnb_account", JSON.stringify(account));
-      window.dispatchEvent(new Event("marbnb:account-changed"));
-      setMessage("Compte créé ✅ Vous pouvez maintenant utiliser Marbnb avec votre profil.");
+      localStorage.setItem("mbnb_account", JSON.stringify(account));
+      window.dispatchEvent(new Event("mbnb:account-changed"));
+      setMessage("Compte créé ✅ Vous pouvez maintenant utiliser Mbnb avec votre profil.");
       return;
     }
 
@@ -62,24 +62,24 @@ export default function ComptePage() {
       telephone: user?.user_metadata?.telephone || telephone.trim(),
       role: user?.user_metadata?.role || role,
     };
-    localStorage.setItem("marbnb_account", JSON.stringify(account));
-    window.dispatchEvent(new Event("marbnb:account-changed"));
+    localStorage.setItem("mbnb_account", JSON.stringify(account));
+    window.dispatchEvent(new Event("mbnb:account-changed"));
     setMessage("Connexion réussie ✅");
   }
 
   function logout() {
     supabase.auth.signOut();
-    localStorage.removeItem("marbnb_account");
-    window.dispatchEvent(new Event("marbnb:account-changed"));
+    localStorage.removeItem("mbnb_account");
+    window.dispatchEvent(new Event("mbnb:account-changed"));
     setMessage("Déconnexion effectuée.");
   }
 
   return (
     <main className="min-h-screen bg-[#f4ead7] px-4 py-8 text-[#1e1b18]">
       <section className="mx-auto max-w-3xl rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3] md:p-8">
-        <p className="font-black text-[#c1121f]">Compte Marbnb</p>
+        <p className="font-black text-[#c1121f]">Compte Mbnb</p>
         <h1 className="mt-2 text-4xl font-black">Créer ou accéder à mon compte</h1>
-        <p className="mt-3 text-[#7a6446]">Choisissez un profil locataire ou hôte pour utiliser les services Marbnb.</p>
+        <p className="mt-3 text-[#7a6446]">Choisissez un profil locataire ou hôte pour utiliser les services Mbnb.</p>
         <div className="mt-6 grid grid-cols-2 gap-3 rounded-2xl bg-[#f4ead7] p-2">
           <button onClick={() => setMode("connexion")} className={`rounded-xl px-4 py-3 font-black ${mode === "connexion" ? "bg-[#0f2f22] text-white" : "text-[#7a3d14]"}`}>Connexion</button>
           <button onClick={() => setMode("creation")} className={`rounded-xl px-4 py-3 font-black ${mode === "creation" ? "bg-[#0f2f22] text-white" : "text-[#7a3d14]"}`}>Créer un compte</button>
