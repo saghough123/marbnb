@@ -212,10 +212,3 @@ header a[href="/admin-dashboard"] {
     display: none !important;
   }
 }
-
-
-/* MARBNB_REMOVE_DUPLICATE_LOCAL_HEADER */
-body > section:empty,
-main > section:empty {
-  display: none !important;
-}
