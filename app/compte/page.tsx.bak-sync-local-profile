@@ -36,8 +36,6 @@ export default function ComptePage() {
         setEmail(account.email || "");
         setTelephone(account.telephone || "");
         setRole(account.role || "locataire");
-        // MARBNB_SYNC_LOCAL_ACCOUNT_ON_LOAD
-        upsertProfile(account).catch(() => undefined);
       }
     } catch {}
   }, []);

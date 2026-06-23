@@ -3,24 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
-function getLocalAccountProfile(): any | null {
-  try {
-    const raw = localStorage.getItem("marbnb_account") || localStorage.getItem("mbnb_account");
-    if (!raw) return null;
-    const a = JSON.parse(raw);
-    return {
-      id: a.id || a.email || "local-account",
-      nom: a.nom || a.name || "",
-      email: a.email || "",
-      telephone: a.telephone || a.phone || "",
-      role: a.role || "locataire",
-      created_at: a.created_at || new Date().toISOString(),
-    };
-  } catch {
-    return null;
-  }
-}
-
 type Profile = {
   id: string;
   nom: string | null;
@@ -47,35 +29,15 @@ export default function AdminUtilisateursPage() {
     charger();
   }, []);
 
-  async function synchroniserCompteLocal() {
-    const local = getLocalAccountProfile();
-    if (!local) {
-      setMessage("Aucun compte local trouvé sur ce navigateur.");
-      return;
-    }
-    const { error } = await supabase.from("profiles").upsert(local);
-    if (error) {
-      setMessage("Impossible de synchroniser le compte local : " + error.message + " — vérifie le SQL profiles.");
-      setProfiles([local]);
-      return;
-    }
-    setMessage("Compte local synchronisé ✅");
-    charger();
-  }
-
   async function charger() {
     setLoading(true);
     setMessage("");
     const { data, error } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
     if (error) {
       setMessage("Erreur chargement utilisateurs : " + error.message + " — vérifie que le SQL profiles a bien été lancé.");
-      const local = getLocalAccountProfile();
-      setProfiles(local ? [local] : []);
+      setProfiles([]);
     } else {
-      const local = getLocalAccountProfile();
-      const rows = data || [];
-      const exists = local && rows.some((p: any) => String(p.email || "") === String(local.email || ""));
-      setProfiles(local && !exists ? [local, ...rows] : rows);
+      setProfiles(data || []);
     }
     setLoading(false);
   }
@@ -95,7 +57,7 @@ export default function AdminUtilisateursPage() {
       <section className="mx-auto max-w-7xl rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3]">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <a href="/admin-dashboard" className="font-black text-[#c1121f]">← Dashboard</a>
-          <div className="flex flex-wrap gap-2"><button onClick={synchroniserCompteLocal} className="rounded-full bg-[#c1121f] px-5 py-2 text-sm font-black text-white">Synchroniser mon compte</button><button onClick={charger} className="rounded-full bg-[#0f2f22] px-5 py-2 text-sm font-black text-white">Actualiser</button></div>
+          <button onClick={charger} className="rounded-full bg-[#0f2f22] px-5 py-2 text-sm font-black text-white">Actualiser</button>
         </div>
 
         <p className="mt-6 font-black text-[#c1121f]">Admin Marbnb</p>
