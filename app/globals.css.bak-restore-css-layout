@@ -1,0 +1,221 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* MBNT_FORCE_HIDE_MOBILE_NAV_START */
+@media (max-width: 767px) {
+  /* Cache le menu dans le header: Séjours / Mettre mon logement */
+  header > div > :nth-child(2) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Cache la barre juste après le header: Séjours / Expériences / Devenir hôte / À propos */
+  header + nav,
+  header + div[class*="border-b"],
+  header + div[class*="sticky"],
+  header + div[class*="backdrop"],
+  header + div[class*="bg-[#fff8ec]"],
+  header + div[class*="bg-white"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+}
+/* MBNT_FORCE_HIDE_MOBILE_NAV_END */
+
+/* MBNT_HIDE_EMPTY_MOBILE_MENU_START */
+@media (max-width: 767px) {
+  button:empty,
+  a:empty {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* Si une barre se retrouve vide après suppression des libellés */
+  nav:empty,
+  div:empty {
+    display: none !important;
+  }
+}
+/* MBNT_HIDE_EMPTY_MOBILE_MENU_END */
+
+/* MBNT_FINAL_MOBILE_CLEAN_START */
+@media (max-width: 767px) {
+  button:empty,
+  a:empty,
+  nav:empty {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    pointer-events: none !important;
+  }
+}
+/* MBNT_FINAL_MOBILE_CLEAN_END */
+
+/* MBNT_FINAL_FAKE_MENU_CROP_START */
+@media (max-width: 767px) {
+  .marbnb-hero-bg {
+    object-position: center 64% !important;
+    transform: scale(1.08) translateY(25px) !important;
+    transform-origin: center bottom !important;
+  }
+
+  .marbnb-fake-menu-mask {
+    display: block !important;
+    height: 130px !important;
+    background: linear-gradient(to bottom, #fff8ec 0%, #fff8ec 72%, rgba(255,248,236,0.92) 100%) !important;
+    z-index: 5 !important;
+    pointer-events: none !important;
+  }
+}
+/* MBNT_FINAL_FAKE_MENU_CROP_END */
+
+/* MBNT_FAKE_MENU_FINAL_POSITION_START */
+@media (max-width: 767px) {
+  .marbnb-hero-bg {
+    object-position: center 68% !important;
+    transform: scale(1.10) translateY(35px) !important;
+    transform-origin: center bottom !important;
+  }
+
+  .marbnb-fake-menu-mask {
+    display: block !important;
+    height: 175px !important;
+    background: #fff8ec !important;
+    z-index: 20 !important;
+    pointer-events: none !important;
+  }
+}
+/* MBNT_FAKE_MENU_FINAL_POSITION_END */
+
+/* MBNB_POLISH_DESIGN_START */
+:root {
+  --marbnb-cream: #f4ead7;
+  --marbnb-paper: #fff8ec;
+  --marbnb-green: #0f2f22;
+  --marbnb-red: #c1121f;
+  --marbnb-brown: #7a3d14;
+  --marbnb-border: #e5d3b3;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    radial-gradient(circle at 12% 8%, rgba(193, 18, 31, 0.07), transparent 26rem),
+    radial-gradient(circle at 88% 18%, rgba(15, 47, 34, 0.08), transparent 28rem),
+    linear-gradient(180deg, #f8efdf 0%, var(--marbnb-cream) 48%, #efe0c7 100%);
+}
+
+button, a {
+  transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease, border-color 180ms ease;
+}
+
+button:hover, a:hover {
+  transform: translateY(-1px);
+}
+
+input, select, textarea {
+  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: rgba(193, 18, 31, 0.45) !important;
+  box-shadow: 0 0 0 4px rgba(193, 18, 31, 0.08) !important;
+}
+
+[class~="rounded-[2rem]"] {
+  box-shadow: 0 18px 45px rgba(87, 55, 24, 0.06);
+}
+
+[class~="bg-[#fff8ec]"] {
+  background-color: rgba(255, 248, 236, 0.96) !important;
+}
+
+[class~="ring-[#e5d3b3]"], [class~="border-[#e5d3b3]"] {
+  border-color: rgba(210, 176, 122, 0.72) !important;
+}
+
+@media (max-width: 767px) {
+  .text-5xl { font-size: 2.45rem !important; line-height: 1.05 !important; }
+  .text-4xl { font-size: 2rem !important; line-height: 1.08 !important; }
+  [class~="rounded-[2rem]"] { border-radius: 1.45rem !important; }
+}
+/* MBNB_POLISH_DESIGN_END */
+
+
+/* MBNB_CATALOGUE_POLISH_START */
+@media (max-width: 767px) {
+  a[href^="/logement/"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+  }
+}
+/* MBNB_CATALOGUE_POLISH_END */
+
+
+/* MBNB_HEADER_SINGLE_LOGO_FIX */
+header a[href="/admin-dashboard"] {
+  white-space: nowrap;
+}
+@media (max-width: 767px) {
+  header nav {
+    display: none !important;
+  }
+}
+
+
+/* MARBNB_REMOVE_DUPLICATE_LOCAL_HEADER */
+body > section:empty,
+main > section:empty {
+  display: none !important;
+}
