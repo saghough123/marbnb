@@ -1,0 +1,150 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
+
+function getLocalAccountProfile(): any | null {
+  try {
+    const raw = localStorage.getItem("marbnb_account") || localStorage.getItem("mbnb_account");
+    if (!raw) return null;
+    const a = JSON.parse(raw);
+    return {
+      id: a.id || a.email || "local-account",
+      nom: a.nom || a.name || "",
+      email: a.email || "",
+      telephone: a.telephone || a.phone || "",
+      role: a.role || "locataire",
+      created_at: a.created_at || new Date().toISOString(),
+    };
+  } catch {
+    return null;
+  }
+}
+
+type Profile = {
+  id: string;
+  nom: string | null;
+  email: string | null;
+  telephone: string | null;
+  role: string | null;
+  created_at: string | null;
+};
+
+export default function AdminUtilisateursPage() {
+  const [autorise, setAutorise] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [filtre, setFiltre] = useState("Tous");
+
+  useEffect(() => {
+    const ok = localStorage.getItem("marbnb_admin_ok") === "true" || localStorage.getItem("mbnb_admin_ok") === "true";
+    if (!ok) {
+      window.location.href = "/admin-login";
+      return;
+    }
+    setAutorise(true);
+    charger();
+  }, []);
+
+  async function synchroniserCompteLocal() {
+    const local = getLocalAccountProfile();
+    if (!local) {
+      setMessage("Aucun compte local trouvé sur ce navigateur.");
+      return;
+    }
+    const { error } = await supabase.from("profiles").upsert(local);
+    if (error) {
+      setMessage("Impossible de synchroniser le compte local : " + error.message + " — vérifie le SQL profiles.");
+      setProfiles([local]);
+      return;
+    }
+    setMessage("Compte local synchronisé ✅");
+    charger();
+  }
+
+  async function charger() {
+    setLoading(true);
+    setMessage("");
+    const { data, error } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
+    if (error) {
+      setMessage("Erreur chargement utilisateurs : " + error.message + " — vérifie que le SQL profiles a bien été lancé.");
+      const local = getLocalAccountProfile();
+      setProfiles(local ? [local] : []);
+    } else {
+      const local = getLocalAccountProfile();
+      const rows = data || [];
+      const exists = local && rows.some((p: any) => String(p.email || "") === String(local.email || ""));
+      setProfiles(local && !exists ? [local, ...rows] : rows);
+    }
+    setLoading(false);
+  }
+
+  const visibles = useMemo(() => {
+    if (filtre === "Tous") return profiles;
+    return profiles.filter((p) => String(p.role || "").toLowerCase() === filtre.toLowerCase());
+  }, [profiles, filtre]);
+
+  const hotes = profiles.filter((p) => p.role === "hote").length;
+  const locataires = profiles.filter((p) => p.role === "locataire").length;
+
+  if (!autorise) return <main className="min-h-screen bg-[#f4ead7] p-8 font-black">Vérification accès admin...</main>;
+
+  return (
+    <main className="min-h-screen bg-[#f4ead7] px-4 py-8 text-[#1e1b18]">
+      <section className="mx-auto max-w-7xl rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3]">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <a href="/admin-dashboard" className="font-black text-[#c1121f]">← Dashboard</a>
+          <div className="flex flex-wrap gap-2"><button onClick={synchroniserCompteLocal} className="rounded-full bg-[#c1121f] px-5 py-2 text-sm font-black text-white">Synchroniser mon compte</button><button onClick={charger} className="rounded-full bg-[#3F7D3B] px-5 py-2 text-sm font-black text-white">Actualiser</button></div>
+        </div>
+
+        <p className="mt-6 font-black text-[#c1121f]">Admin Marbnb</p>
+        <h1 className="mt-2 text-4xl font-black">Utilisateurs</h1>
+        <p className="mt-3 text-[#7a6446]">Visualiser les comptes locataires et hôtes créés.</p>
+
+        {message && <p className="mt-5 rounded-2xl bg-amber-50 p-4 font-bold text-amber-700">{message}</p>}
+        {loading && <p className="mt-6 font-bold">Chargement...</p>}
+
+        {!loading && (
+          <>
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Total</p><p className="mt-2 text-3xl font-black">{profiles.length}</p></div>
+              <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Hôtes</p><p className="mt-2 text-3xl font-black">{hotes}</p></div>
+              <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Locataires</p><p className="mt-2 text-3xl font-black">{locataires}</p></div>
+            </div>
+
+            <div className="mt-5 rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]">
+              <label className="text-xs font-black text-[#7a3d14]">Filtrer</label>
+              <select value={filtre} onChange={(e) => setFiltre(e.target.value)} className="mt-2 w-full rounded-2xl border bg-white px-4 py-3 outline-none md:w-72">
+                <option>Tous</option>
+                <option>locataire</option>
+                <option>hote</option>
+                <option>admin</option>
+              </select>
+            </div>
+
+            <div className="mt-6 overflow-x-auto rounded-[2rem] bg-white p-5 ring-1 ring-[#e5d3b3]">
+              <table className="w-full min-w-[760px] text-left text-sm">
+                <thead>
+                  <tr className="border-b text-[#7a6446]"><th className="py-3">Nom</th><th>Email</th><th>Téléphone</th><th>Rôle</th><th>Création</th></tr>
+                </thead>
+                <tbody>
+                  {visibles.map((p) => (
+                    <tr key={p.id} className="border-b last:border-0">
+                      <td className="py-3 font-bold">{p.nom || "-"}</td>
+                      <td>{p.email || "-"}</td>
+                      <td>{p.telephone || "-"}</td>
+                      <td><span className="rounded-full bg-[#f4ead7] px-3 py-1 text-xs font-black text-[#7a3d14]">{p.role || "-"}</span></td>
+                      <td>{p.created_at ? new Date(p.created_at).toLocaleDateString("fr-FR") : "-"}</td>
+                    </tr>
+                  ))}
+                  {visibles.length === 0 && <tr><td colSpan={5} className="py-8 text-center font-bold text-[#7a6446]">Aucun utilisateur pour ce filtre.</td></tr>}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+      </section>
+    </main>
+  );
+}

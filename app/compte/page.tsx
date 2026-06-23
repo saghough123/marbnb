@@ -95,16 +95,16 @@ export default function ComptePage() {
         <h1 className="mt-2 text-4xl font-black">Créer ou accéder à mon compte</h1>
         <p className="mt-3 text-[#7a6446]">Choisissez un profil locataire ou hôte pour utiliser les services Marbnb.</p>
         <div className="mt-6 grid grid-cols-2 gap-3 rounded-2xl bg-[#f4ead7] p-2">
-          <button onClick={() => setMode("connexion")} className={`rounded-xl px-4 py-3 font-black ${mode === "connexion" ? "bg-[#0f2f22] text-white" : "text-[#7a3d14]"}`}>Connexion</button>
-          <button onClick={() => setMode("creation")} className={`rounded-xl px-4 py-3 font-black ${mode === "creation" ? "bg-[#0f2f22] text-white" : "text-[#7a3d14]"}`}>Créer un compte</button>
+          <button onClick={() => setMode("connexion")} className={`rounded-xl px-4 py-3 font-black ${mode === "connexion" ? "bg-[#3F7D3B] text-white" : "text-[#7a3d14]"}`}>Connexion</button>
+          <button onClick={() => setMode("creation")} className={`rounded-xl px-4 py-3 font-black ${mode === "creation" ? "bg-[#3F7D3B] text-white" : "text-[#7a3d14]"}`}>Créer un compte</button>
         </div>
         <form onSubmit={submit} className="mt-6 grid gap-4">
           {mode === "creation" && (<>
             <div>
               <label className="text-xs font-black text-[#7a3d14]">Type de compte</label>
               <div className="mt-2 grid grid-cols-2 gap-3">
-                <button type="button" onClick={() => setRole("locataire")} className={`rounded-2xl border px-4 py-3 font-black ${role === "locataire" ? "border-[#0f2f22] bg-green-50" : "bg-white"}`}>Locataire</button>
-                <button type="button" onClick={() => setRole("hote")} className={`rounded-2xl border px-4 py-3 font-black ${role === "hote" ? "border-[#0f2f22] bg-green-50" : "bg-white"}`}>Hôte</button>
+                <button type="button" onClick={() => setRole("locataire")} className={`rounded-2xl border px-4 py-3 font-black ${role === "locataire" ? "border-[#3F7D3B] bg-[#EAF3E4]" : "bg-white"}`}>Locataire</button>
+                <button type="button" onClick={() => setRole("hote")} className={`rounded-2xl border px-4 py-3 font-black ${role === "hote" ? "border-[#3F7D3B] bg-[#EAF3E4]" : "bg-white"}`}>Hôte</button>
               </div>
             </div>
             <input value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Nom complet" className="rounded-2xl border bg-white px-4 py-3 outline-none" />
@@ -114,9 +114,9 @@ export default function ComptePage() {
           <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Mot de passe" className="rounded-2xl border bg-white px-4 py-3 outline-none" />
           <button disabled={loading} className="rounded-2xl bg-[#c1121f] px-6 py-4 font-black text-white disabled:opacity-60">{loading ? "Traitement..." : mode === "creation" ? "Créer mon compte" : "Me connecter"}</button>
         </form>
-        {message && <p className="mt-5 rounded-2xl bg-green-50 p-4 font-bold text-green-800">{message}</p>}
+        {message && <p className="mt-5 rounded-2xl bg-[#EAF3E4] p-4 font-bold text-#3F7D3B">{message}</p>}
         <div className="mt-6 flex flex-wrap gap-3">
-          <a href="/resultats" className="rounded-full bg-[#0f2f22] px-5 py-3 text-sm font-black text-white">Explorer</a>
+          <a href="/resultats" className="rounded-full bg-[#3F7D3B] px-5 py-3 text-sm font-black text-white">Explorer</a>
           <a href="/hote" className="rounded-full bg-white px-5 py-3 text-sm font-black text-[#7a3d14] ring-1 ring-[#e5d3b3]">Devenir hôte</a>
           <button onClick={logout} type="button" className="rounded-full bg-red-700 px-5 py-3 text-sm font-black text-white">Déconnexion</button>
         </div>

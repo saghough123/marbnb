@@ -108,7 +108,7 @@ export default function AdminReservationsPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <a href="/admin-dashboard" className="text-sm font-black text-[#c1121f]">← Dashboard</a>
           <div className="flex flex-wrap gap-2">
-            <a href="/admin-demandes" className="rounded-full bg-[#0f2f22] px-5 py-2 text-sm font-black text-white">Demandes</a>
+            <a href="/admin-demandes" className="rounded-full bg-[#3F7D3B] px-5 py-2 text-sm font-black text-white">Demandes</a>
             <a href="/admin-logements" className="rounded-full bg-[#7a3d14] px-5 py-2 text-sm font-black text-white">Logements</a>
             <button onClick={chargerReservations} className="rounded-full bg-white px-5 py-2 text-sm font-black text-[#7a3d14] ring-1 ring-[#e5d3b3]">Actualiser</button>
             <button onClick={deconnexion} className="rounded-full bg-red-700 px-5 py-2 text-sm font-black text-white">Déconnexion</button>
@@ -120,7 +120,7 @@ export default function AdminReservationsPage() {
           <h1 className="mt-2 text-4xl font-black">Gestion des réservations</h1>
           <p className="mt-3 text-[#7a6446]">Voir, confirmer, annuler ou supprimer les réservations.</p>
 
-          {message && <p className="mt-4 rounded-2xl bg-green-50 p-4 font-bold text-green-800">{message}</p>}
+          {message && <p className="mt-4 rounded-2xl bg-[#EAF3E4] p-4 font-bold text-#3F7D3B">{message}</p>}
           {loading && <p className="mt-6 font-bold">Chargement...</p>}
 
           {!loading && (
@@ -168,7 +168,7 @@ export default function AdminReservationsPage() {
                           <td className="py-3"><span className="rounded-full bg-[#f4ead7] px-3 py-1 text-xs font-black text-[#7a3d14]">{getText(r, ["statut", "status"])}</span></td>
                           <td className="py-3">
                             <div className="flex flex-wrap gap-2">
-                              <button onClick={() => changerStatut(id, "Confirmée")} className="rounded-full bg-green-700 px-3 py-2 text-xs font-black text-white">Confirmer</button>
+                              <button onClick={() => changerStatut(id, "Confirmée")} className="rounded-full bg-#3F7D3B px-3 py-2 text-xs font-black text-white">Confirmer</button>
                               <button onClick={() => changerStatut(id, "Annulée")} className="rounded-full bg-amber-600 px-3 py-2 text-xs font-black text-white">Annuler</button>
                               <button onClick={() => supprimerReservation(id)} className="rounded-full bg-red-700 px-3 py-2 text-xs font-black text-white">Supprimer</button>
                             </div>

@@ -107,7 +107,7 @@ export default function AdminDemandesPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <a href="/" className="text-sm font-black text-[#c1121f]">← Accueil</a><a href="/admin-dashboard" className="ml-3 text-sm font-black text-[#7a3d14]">Dashboard</a>
           <div className="flex flex-wrap gap-2">
-            <a href="/hote" className="rounded-full bg-[#0f2f22] px-5 py-2 text-sm font-black text-white">Ajouter demande test</a><a href="/admin-logements" className="rounded-full bg-[#7a3d14] px-5 py-2 text-sm font-black text-white">Gérer logements</a>
+            <a href="/hote" className="rounded-full bg-[#3F7D3B] px-5 py-2 text-sm font-black text-white">Ajouter demande test</a><a href="/admin-logements" className="rounded-full bg-[#7a3d14] px-5 py-2 text-sm font-black text-white">Gérer logements</a>
             <button onClick={deconnexionAdmin} className="rounded-full bg-red-700 px-5 py-2 text-sm font-black text-white">Déconnexion</button>
           </div>
         </div>
@@ -116,7 +116,7 @@ export default function AdminDemandesPage() {
           <p className="font-black text-[#c1121f]">Admin Marbnb</p>
           <h1 className="mt-2 text-4xl font-black">Demandes hôtes</h1>
           <p className="mt-3 text-[#7a6446]">Cette page est protégée par mot de passe prototype.</p>
-          {message && <p className="mt-4 rounded-2xl bg-green-50 p-4 font-bold text-green-800">{message}</p>}
+          {message && <p className="mt-4 rounded-2xl bg-[#EAF3E4] p-4 font-bold text-#3F7D3B">{message}</p>}
           {loading && <p className="mt-6 font-bold">Chargement...</p>}
           {!loading && demandes.length === 0 && <p className="mt-6 rounded-2xl bg-amber-50 p-4 font-bold text-amber-700">Aucune demande pour le moment.</p>}
 
@@ -135,7 +135,7 @@ export default function AdminDemandesPage() {
                   </div>
                   <p className="mt-4 text-sm leading-6 text-[#5f4b32]">{d.description || "Aucune description."}</p>
                   <div className="mt-5 flex flex-wrap gap-3">
-                    <button onClick={() => publierLogement(d)} className="rounded-full bg-green-700 px-5 py-3 text-sm font-black text-white">Accepter + publier</button>
+                    <button onClick={() => publierLogement(d)} className="rounded-full bg-#3F7D3B px-5 py-3 text-sm font-black text-white">Accepter + publier</button>
                     <button onClick={() => changerStatut(d.id, "Refusée")} className="rounded-full bg-red-700 px-5 py-3 text-sm font-black text-white">Refuser</button>
                     <button onClick={() => changerStatut(d.id, "En attente")} className="rounded-full bg-[#f4ead7] px-5 py-3 text-sm font-black text-[#7a3d14]">Remettre en attente</button>
                   </div>

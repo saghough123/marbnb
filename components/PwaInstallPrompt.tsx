@@ -57,14 +57,14 @@ export default function PwaInstallPrompt() {
       <div className="flex gap-3">
         <img src="/marbnb-logo.png" alt="Logo Marbnb" className="h-12 w-12 rounded-xl object-contain" />
         <div className="flex-1">
-          <p className="font-black text-[#0f2f22]">Installer l’application Marbnb</p>
+          <p className="font-black text-[#3F7D3B]">Installer l’application Marbnb</p>
           {isIos ? (
             <p className="mt-1 text-sm text-[#7a6446]">Sur iPhone : touchez Partager puis “Ajouter à l’écran d’accueil”.</p>
           ) : (
             <p className="mt-1 text-sm text-[#7a6446]">Ajoutez Marbnb sur votre écran d’accueil comme une application.</p>
           )}
           <div className="mt-3 flex flex-wrap gap-2">
-            {!isIos && deferredPrompt && <button onClick={install} className="rounded-full bg-[#0f2f22] px-4 py-2 text-sm font-black text-white">Installer</button>}
+            {!isIos && deferredPrompt && <button onClick={install} className="rounded-full bg-[#3F7D3B] px-4 py-2 text-sm font-black text-white">Installer</button>}
             <a href="/installation" className="rounded-full bg-white px-4 py-2 text-sm font-black text-[#7a3d14] ring-1 ring-[#e5d3b3]">Guide</a>
             <button onClick={close} className="rounded-full px-4 py-2 text-sm font-black text-[#7a6446]">Plus tard</button>
           </div>

@@ -137,7 +137,7 @@ body {
 :root {
   --marbnb-cream: #f4ead7;
   --marbnb-paper: #fff8ec;
-  --marbnb-green: #0f2f22;
+  --marbnb-green: #3F7D3B;
   --marbnb-red: #c1121f;
   --marbnb-brown: #7a3d14;
   --marbnb-border: #e5d3b3;
@@ -218,4 +218,26 @@ header a[href="/admin-dashboard"] {
 body > section:empty,
 main > section:empty {
   display: none !important;
+}
+
+
+/* MARBNB_MOROCCAN_GREEN_THEME */
+:root {
+  --marbnb-green: #3F7D3B;
+  --marbnb-green-dark: #2F5F2C;
+  --marbnb-green-soft: #EAF3E4;
+}
+
+button[class*="bg-[#3F7D3B]"]:hover,
+a[class*="bg-[#3F7D3B]"]:hover {
+  background-color: #2F5F2C !important;
+}
+
+
+/* MARBNB_FORCE_HERO_IMAGE */
+.marbnb-hero-bg,
+[data-marbnb-hero="true"] {
+  background-image: url('/marbnb-hero-mix.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
 }

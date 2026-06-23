@@ -102,7 +102,7 @@ export default function AdminLogementsPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div><a href="/admin-demandes" className="text-sm font-black text-[#c1121f]">← Demandes hôtes</a><a href="/admin-dashboard" className="ml-3 text-sm font-black text-[#7a3d14]">Dashboard</a></div>
           <div className="flex flex-wrap gap-2">
-            <a href="/resultats" className="rounded-full bg-[#0f2f22] px-5 py-2 text-sm font-black text-white">Voir résultats</a>
+            <a href="/resultats" className="rounded-full bg-[#3F7D3B] px-5 py-2 text-sm font-black text-white">Voir résultats</a>
             <button onClick={deconnexion} className="rounded-full bg-red-700 px-5 py-2 text-sm font-black text-white">Déconnexion</button>
           </div>
         </div>
@@ -112,7 +112,7 @@ export default function AdminLogementsPage() {
           <h1 className="mt-2 text-4xl font-black">Gestion des logements</h1>
           <p className="mt-3 text-[#7a6446]">Modifier le prix, changer le statut ou supprimer un logement publié.</p>
 
-          {message && <p className="mt-4 rounded-2xl bg-green-50 p-4 font-bold text-green-800">{message}</p>}
+          {message && <p className="mt-4 rounded-2xl bg-[#EAF3E4] p-4 font-bold text-#3F7D3B">{message}</p>}
           {loading && <p className="mt-6 font-bold">Chargement...</p>}
 
           <div className="mt-6 grid gap-5">
@@ -168,7 +168,7 @@ export default function AdminLogementsPage() {
                     </div>
 
                     <div className="mt-5 flex flex-wrap gap-3">
-                      <button onClick={() => updateLogement(l.id, { statut: "Actif" })} className="rounded-full bg-green-700 px-5 py-3 text-sm font-black text-white">Activer</button>
+                      <button onClick={() => updateLogement(l.id, { statut: "Actif" })} className="rounded-full bg-#3F7D3B px-5 py-3 text-sm font-black text-white">Activer</button>
                       <button onClick={() => updateLogement(l.id, { statut: "Masqué" })} className="rounded-full bg-amber-600 px-5 py-3 text-sm font-black text-white">Masquer</button>
                       <button onClick={() => supprimerLogement(l.id)} className="rounded-full bg-red-700 px-5 py-3 text-sm font-black text-white">Supprimer</button>
                     </div>

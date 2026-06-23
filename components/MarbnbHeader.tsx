@@ -49,18 +49,18 @@ export default function MarbnbHeader() {
             <img src="/marbnb-logo.png" alt="Logo Marbnb" className="h-12 w-12 object-contain" />
           </span>
           <span className="leading-tight">
-            <span className="block text-2xl font-black tracking-tight text-[#0f2f22]"><span className="text-[#c1121f]">Mar</span>bnb</span>
+            <span className="block text-2xl font-black tracking-tight text-[#3F7D3B]"><span className="text-[#c1121f]">Mar</span>bnb</span>
             <span className="hidden text-xs font-bold text-[#7a6446] sm:block">Experience Maroc</span>
           </span>
         </a>
 
         <nav className="hidden items-center gap-2 md:flex">
-          <a href="/" className="rounded-full px-4 py-2 text-sm font-black text-[#0f2f22] hover:bg-[#f4ead7]">Accueil</a>
-          <a href="/resultats" className="rounded-full px-4 py-2 text-sm font-black text-[#0f2f22] hover:bg-[#f4ead7]">Explorer</a>
-          <a href="/favoris" className="rounded-full px-4 py-2 text-sm font-black text-[#0f2f22] hover:bg-[#f4ead7]">Favoris</a>
-          <a href="/hote" className="rounded-full px-4 py-2 text-sm font-black text-[#0f2f22] hover:bg-[#f4ead7]">Devenir hôte</a>
-          <a href="/installation" className="rounded-full px-4 py-2 text-sm font-black text-[#0f2f22] hover:bg-[#f4ead7]">Application</a>
-          <a href="/admin-dashboard" className="rounded-full px-4 py-2 text-sm font-black text-[#0f2f22] hover:bg-[#f4ead7]">Admin</a>
+          <a href="/" className="rounded-full px-4 py-2 text-sm font-black text-[#3F7D3B] hover:bg-[#f4ead7]">Accueil</a>
+          <a href="/resultats" className="rounded-full px-4 py-2 text-sm font-black text-[#3F7D3B] hover:bg-[#f4ead7]">Explorer</a>
+          <a href="/favoris" className="rounded-full px-4 py-2 text-sm font-black text-[#3F7D3B] hover:bg-[#f4ead7]">Favoris</a>
+          <a href="/hote" className="rounded-full px-4 py-2 text-sm font-black text-[#3F7D3B] hover:bg-[#f4ead7]">Devenir hôte</a>
+          <a href="/installation" className="rounded-full px-4 py-2 text-sm font-black text-[#3F7D3B] hover:bg-[#f4ead7]">Application</a>
+          <a href="/admin-dashboard" className="rounded-full px-4 py-2 text-sm font-black text-[#3F7D3B] hover:bg-[#f4ead7]">Admin</a>
         </nav>
 
         <div className="flex items-center gap-2">
@@ -69,10 +69,10 @@ export default function MarbnbHeader() {
               <a href="/compte" className="hidden rounded-full bg-white px-4 py-2 text-sm font-black text-[#7a3d14] ring-1 ring-[#e5d3b3] sm:inline-flex">
                 {account.nom || account.email || "Mon compte"}
               </a>
-              <button onClick={logout} className="rounded-full bg-[#0f2f22] px-4 py-2 text-sm font-black text-white">Sortir</button>
+              <button onClick={logout} className="rounded-full bg-[#3F7D3B] px-4 py-2 text-sm font-black text-white">Sortir</button>
             </>
           ) : (
-            <a href="/compte" className="rounded-full bg-[#0f2f22] px-5 py-2 text-sm font-black text-white">Connexion</a>
+            <a href="/compte" className="rounded-full bg-[#3F7D3B] px-5 py-2 text-sm font-black text-white">Connexion</a>
           )}
         </div>
       </div>

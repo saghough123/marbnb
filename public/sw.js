@@ -1,4 +1,4 @@
-const CACHE_NAME = "marbnb-cache-v1";
+const CACHE_NAME = "marbnb-cache-v9";
 const STATIC_ASSETS = [
   "/",
   "/resultats",

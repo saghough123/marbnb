@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   title: "Marbnb – Experience Maroc",
   description: "Marbnb – Experience Maroc, séjours authentiques au Maroc",
   manifest: "/manifest.webmanifest",
-  themeColor: "#0f2f22",
+  themeColor: "#3F7D3B",
   appleWebApp: { capable: true, title: "Marbnb", statusBarStyle: "default" },
 };
 

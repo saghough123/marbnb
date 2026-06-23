@@ -9,15 +9,34 @@ import MbnbMap from "@/components/MbnbMap";
 type Logement = Record<string, any>;
 
 function parsePhotos(value: string | null | undefined, imageUrl?: string | null) {
+  const raw: string[] = [];
+
   if (value) {
     try {
       const parsed = JSON.parse(value);
-      if (Array.isArray(parsed)) return parsed.filter(Boolean);
+      if (Array.isArray(parsed)) raw.push(...parsed.filter(Boolean).map(String));
+      else if (typeof parsed === "string") raw.push(parsed);
     } catch {
-      return [value];
+      raw.push(value);
     }
   }
-  return imageUrl ? [imageUrl] : [];
+
+  if (imageUrl) raw.unshift(imageUrl);
+
+  const clean = raw
+    .map((x) => String(x || "").trim())
+    .filter(Boolean)
+    // éviter que l'image hero, le logo ou une icône app deviennent des photos de logement
+    .filter((url) => !url.includes("marbnb-hero-mix"))
+    .filter((url) => !url.includes("mbnb-logo"))
+    .filter((url) => !url.includes("marbnb-logo"))
+    .filter((url) => !url.includes("apple-touch-icon"))
+    .filter((url) => !url.includes("favicon"))
+    // on garde les vraies URLs web, les chemins /storage et /uploads
+    .filter((url) => url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/storage") || url.startsWith("/uploads") || url.startsWith("/logements"))
+    .filter((url, index, arr) => arr.indexOf(url) === index);
+
+  return clean;
 }
 
 function addDaysISO(dateISO: string, days: number) {
@@ -59,6 +78,42 @@ function getNumber(row: Logement | null, keys: string[], fallback = 0) {
     if (!Number.isNaN(value) && value > 0) return value;
   }
   return fallback;
+}
+
+
+function getFallbackGalleryByTitle(title: string) {
+  const galleries: Record<string, string[]> = {
+  "Appartement moderne Maarif": [
+    "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=80",
+    "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1600210492493-0946911123ea?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=80"
+  ],
+  "Studio proche Corniche": [
+    "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1400&q=80",
+    "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1560448075-bb485b067938?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80"
+  ],
+  "Villa familiale avec piscine": [
+    "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1400&q=80",
+    "https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
+  ],
+  "Riad traditionnel au centre": [
+    "https://images.unsplash.com/photo-1548019979-0d243fc2a803?auto=format&fit=crop&w=1400&q=80",
+    "https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1549144511-f099e773c147?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1604014237800-1c9102c219da?auto=format&fit=crop&w=1200&q=80"
+  ]
+};
+  const found = Object.keys(galleries).find((key) => title.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(title.toLowerCase()));
+  return found ? galleries[found] : galleries["Appartement moderne Maarif"];
 }
 
 export default function LogementDetailPage() {
@@ -132,8 +187,15 @@ export default function LogementDetailPage() {
     charger();
   }, [rawId]);
 
-  const imageUrl = getValue(logement, ["image_url", "photo", "image"], "");
+  const detailFallbackImages = [
+    "https://images.unsplash.com/photo-1577147443647-81856d5151af?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=80",
+  ];
+  const imageUrl = getValue(logement, ["image_url", "photo", "image"], detailFallbackImages[0]);
   const photos = useMemo(() => parsePhotos(getValue(logement, ["photos"], ""), imageUrl), [logement, imageUrl]);
+  const photosAffichees = photos.length > 0 ? photos : detailFallbackImages;
+  const photosUniquesAffichees = photosAffichees.filter((p, i, arr) => arr.indexOf(p) === i);
   const titre = getValue(logement, ["titre", "title", "nom"], "Logement Marbnb");
   const ville = getValue(logement, ["ville", "city"], "Maroc");
   const quartier = getValue(logement, ["quartier", "district"], "");
@@ -242,7 +304,7 @@ export default function LogementDetailPage() {
       <header className="sticky top-0 z-30 border-b border-[#e5d3b3] bg-[#fff8ec]/95 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
           <a href="/" className="text-3xl font-black"><span className="text-[#c1121f]">M</span>bnb</a>
-          <a href="/resultats" className="rounded-full bg-[#0f2f22] px-5 py-2 text-sm font-black text-white">Résultats</a>
+          <a href="/resultats" className="rounded-full bg-[#3F7D3B] px-5 py-2 text-sm font-black text-white">Résultats</a>
         </div>
       </header>
 
@@ -252,11 +314,11 @@ export default function LogementDetailPage() {
           <div>
             <div className="rounded-[2rem] bg-[#fff8ec] p-5 shadow-sm ring-1 ring-[#e5d3b3]">
               <div className="overflow-hidden rounded-[1.5rem] bg-white">
-                {photos.length > 0 ? <img src={photos[photoActive] || photos[0]} alt={titre} className="h-[420px] w-full object-cover" /> : <div className="grid h-[420px] place-items-center bg-[#f4ead7] font-bold text-[#7a6446]">Pas de photo</div>}
+                {photosAffichees.length > 0 ? <img src={photosUniquesAffichees[photoActive] || photosUniquesAffichees[0]} alt={titre} className="h-[420px] w-full object-cover" /> : <div className="grid h-[420px] place-items-center bg-[#f4ead7] font-bold text-[#7a6446]">Pas de photo</div>}
               </div>
-              {photos.length > 1 && (
+              {photosUniquesAffichees.length > 1 && (
                 <div className="mt-4 grid grid-cols-3 gap-3 md:grid-cols-5">
-                  {photos.slice(0, 10).map((photo, index) => (
+                  {photosUniquesAffichees.slice(0, 10).map((photo, index) => (
                     <button key={photo} onClick={() => setPhotoActive(index)} className={`overflow-hidden rounded-2xl ring-2 ${photoActive === index ? "ring-[#c1121f]" : "ring-transparent"}`}>
                       <img src={photo} alt="Photo logement" className="h-24 w-full object-cover" />
                     </button>
@@ -290,8 +352,8 @@ export default function LogementDetailPage() {
             </div>
 
             <div className="mt-4 grid gap-2">
-              <button onClick={() => setPaiement("ligne")} className={`rounded-2xl border p-4 text-left ${paiement === "ligne" ? "border-[#0f2f22] bg-green-50" : "bg-white"}`}><b>Paiement en ligne</b><p className="text-sm text-[#7a6446]">Sans frais supplémentaires.</p></button>
-              <button onClick={() => setPaiement("espece")} className={`rounded-2xl border p-4 text-left ${paiement === "espece" ? "border-[#0f2f22] bg-green-50" : "bg-white"}`}><b>Espèces sur place</b><p className="text-sm text-[#7a6446]">Frais de service 5%.</p></button>
+              <button onClick={() => setPaiement("ligne")} className={`rounded-2xl border p-4 text-left ${paiement === "ligne" ? "border-[#3F7D3B] bg-[#EAF3E4]" : "bg-white"}`}><b>Paiement en ligne</b><p className="text-sm text-[#7a6446]">Sans frais supplémentaires.</p></button>
+              <button onClick={() => setPaiement("espece")} className={`rounded-2xl border p-4 text-left ${paiement === "espece" ? "border-[#3F7D3B] bg-[#EAF3E4]" : "bg-white"}`}><b>Espèces sur place</b><p className="text-sm text-[#7a6446]">Frais de service 5%.</p></button>
             </div>
 
             <div className="mt-5 rounded-2xl bg-white p-4 ring-1 ring-[#e5d3b3]">
@@ -312,7 +374,7 @@ export default function LogementDetailPage() {
             </div>
 
             {message && <p className="mt-4 rounded-2xl bg-amber-50 p-3 text-sm font-bold text-amber-700">{message}</p>}
-            <button onClick={verifierDisponibilite} disabled={checkingDisponibilite} className="mt-5 w-full rounded-2xl bg-[#0f2f22] px-6 py-4 font-black text-white disabled:opacity-60">{checkingDisponibilite ? "Vérification..." : disponibiliteVerifiee ? "Disponibilité vérifiée ✅" : "Vérifier les disponibilités"}</button>
+            <button onClick={verifierDisponibilite} disabled={checkingDisponibilite} className="mt-5 w-full rounded-2xl bg-[#3F7D3B] px-6 py-4 font-black text-white disabled:opacity-60">{checkingDisponibilite ? "Vérification..." : disponibiliteVerifiee ? "Disponibilité vérifiée ✅" : "Vérifier les disponibilités"}</button>
             <button onClick={reserver} disabled={saving || !disponibiliteVerifiee} className="mt-3 w-full rounded-2xl bg-[#c1121f] px-6 py-4 font-black text-white disabled:opacity-50">{saving ? "Enregistrement..." : "Confirmer la réservation"}</button>
           </aside>
         </div>

@@ -27,7 +27,7 @@ export default function AdminLoginPage() {
         <form onSubmit={connexion} className="mt-6">
           <label className="text-xs font-black text-[#7a3d14]">Mot de passe</label>
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" autoFocus />
-          <button className="mt-5 w-full rounded-2xl bg-[#0f2f22] px-6 py-4 font-black text-white">Se connecter</button>
+          <button className="mt-5 w-full rounded-2xl bg-[#3F7D3B] px-6 py-4 font-black text-white">Se connecter</button>
         </form>
         {message && <p className="mt-4 rounded-2xl bg-red-50 p-3 text-sm font-bold text-red-700">{message}</p>}
         <div className="mt-5 rounded-2xl bg-[#f4ead7] p-4 text-xs text-[#7a6446]">

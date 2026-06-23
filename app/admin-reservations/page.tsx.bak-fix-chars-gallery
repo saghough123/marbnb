@@ -1,0 +1,189 @@
+
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
+
+type Reservation = Record<string, any>;
+
+function getText(row: Reservation, keys: string[], fallback = "-") {
+  for (const key of keys) {
+    const value = row?.[key];
+    if (value !== undefined && value !== null && String(value).trim() !== "") return String(value);
+  }
+  return fallback;
+}
+
+function getNumber(row: Reservation, keys: string[], fallback = 0) {
+  for (const key of keys) {
+    const value = Number(row?.[key]);
+    if (!Number.isNaN(value) && value > 0) return value;
+  }
+  return fallback;
+}
+
+function getDateValue(row: Reservation) {
+  const value = row?.created_at || row?.date_creation || row?.createdAt || row?.date || row?.arrivee || row?.date_arrivee || "";
+  const time = new Date(value).getTime();
+  return Number.isNaN(time) ? 0 : time;
+}
+
+function formatMad(value: number) {
+  return new Intl.NumberFormat("fr-MA", { maximumFractionDigits: 0 }).format(value) + " MAD";
+}
+
+export default function AdminReservationsPage() {
+  const [autorise, setAutorise] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [filtre, setFiltre] = useState("Toutes");
+
+  useEffect(() => {
+    const ok = localStorage.getItem("marbnb_admin_ok") === "true";
+    if (!ok) {
+      window.location.href = "/admin-login";
+      return;
+    }
+    setAutorise(true);
+    chargerReservations();
+  }, []);
+
+  async function chargerReservations() {
+    setLoading(true);
+    setMessage("");
+
+    const { data, error } = await supabase.from("reservations").select("*");
+    if (error) {
+      setMessage("Erreur technique : " + error.message);
+      setReservations([]);
+    } else {
+      setReservations([...(data || [])].sort((a, b) => getDateValue(b) - getDateValue(a)));
+    }
+    setLoading(false);
+  }
+
+  async function changerStatut(id: string | number, statut: string) {
+    const { error } = await supabase.from("reservations").update({ statut }).eq("id", id);
+    if (error) {
+      setMessage("Erreur modification statut : " + error.message);
+      return;
+    }
+    setReservations((old) => old.map((r) => r.id === id ? { ...r, statut } : r));
+    setMessage("Statut réservation modifié ✅");
+  }
+
+  async function supprimerReservation(id: string | number) {
+    const ok = window.confirm("Supprimer définitivement cette réservation ?");
+    if (!ok) return;
+
+    const { error } = await supabase.from("reservations").delete().eq("id", id);
+    if (error) {
+      setMessage("Erreur suppression : " + error.message);
+      return;
+    }
+    setReservations((old) => old.filter((r) => r.id !== id));
+    setMessage("Réservation supprimée ✅");
+  }
+
+  function deconnexion() {
+    localStorage.removeItem("marbnb_admin_ok");
+    window.location.href = "/admin-login";
+  }
+
+  const reservationsFiltrees = useMemo(() => {
+    if (filtre === "Toutes") return reservations;
+    return reservations.filter((r) => getText(r, ["statut", "status"], "").toLowerCase() === filtre.toLowerCase());
+  }, [reservations, filtre]);
+
+  const totalCA = reservationsFiltrees.reduce((sum, r) => sum + getNumber(r, ["total", "montant", "prix_total", "amount"], 0), 0);
+
+  if (!autorise) {
+    return <main className="min-h-screen bg-[#f4ead7] p-8 font-black">Vérification accès admin...</main>;
+  }
+
+  return (
+    <main className="min-h-screen bg-[#f4ead7] px-4 py-8 text-[#1e1b18]">
+      <div className="mx-auto max-w-7xl">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <a href="/admin-dashboard" className="text-sm font-black text-[#c1121f]">← Dashboard</a>
+          <div className="flex flex-wrap gap-2">
+            <a href="/admin-demandes" className="rounded-full bg-[#3F7D3B] px-5 py-2 text-sm font-black text-white">Demandes</a>
+            <a href="/admin-logements" className="rounded-full bg-[#7a3d14] px-5 py-2 text-sm font-black text-white">Logements</a>
+            <button onClick={chargerReservations} className="rounded-full bg-white px-5 py-2 text-sm font-black text-[#7a3d14] ring-1 ring-[#e5d3b3]">Actualiser</button>
+            <button onClick={deconnexion} className="rounded-full bg-red-700 px-5 py-2 text-sm font-black text-white">Déconnexion</button>
+          </div>
+        </div>
+
+        <section className="mt-5 rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3]">
+          <p className="font-black text-[#c1121f]">Admin Marbnb</p>
+          <h1 className="mt-2 text-4xl font-black">Gestion des réservations</h1>
+          <p className="mt-3 text-[#7a6446]">Voir, confirmer, annuler ou supprimer les réservations.</p>
+
+          {message && <p className="mt-4 rounded-2xl bg-[#EAF3E4] p-4 font-bold text-#3F7D3B">{message}</p>}
+          {loading && <p className="mt-6 font-bold">Chargement...</p>}
+
+          {!loading && (
+            <>
+              <div className="mt-6 grid gap-4 md:grid-cols-3">
+                <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Réservations affichées</p><p className="mt-2 text-3xl font-black">{reservationsFiltrees.length}</p></div>
+                <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">CA affiché</p><p className="mt-2 text-3xl font-black">{formatMad(totalCA)}</p></div>
+                <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]">
+                  <label className="text-xs font-black text-[#7a3d14]">Filtrer par statut</label>
+                  <select value={filtre} onChange={(e) => setFiltre(e.target.value)} className="mt-2 w-full rounded-2xl border bg-white px-4 py-3 outline-none">
+                    <option>Toutes</option>
+                    <option>Confirmée</option>
+                    <option>Payée en ligne</option>
+                    <option>Pré-confirmée</option>
+                    <option>Annulée</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="mt-8 overflow-x-auto rounded-[2rem] bg-white p-5 ring-1 ring-[#e5d3b3]">
+                <table className="w-full min-w-[920px] text-left text-sm">
+                  <thead>
+                    <tr className="border-b text-[#7a6446]">
+                      <th className="py-3">Logement</th>
+                      <th className="py-3">Ville</th>
+                      <th className="py-3">Dates</th>
+                      <th className="py-3">Voyageurs</th>
+                      <th className="py-3">Paiement</th>
+                      <th className="py-3">Total</th>
+                      <th className="py-3">Statut</th>
+                      <th className="py-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reservationsFiltrees.map((r) => {
+                      const id = String(r.id);
+                      return (
+                        <tr key={String(id)} className="border-b last:border-0 align-top">
+                          <td className="py-3 font-bold">{getText(r, ["logement_titre", "titre", "logement", "property_title", "nom_logement"])}</td>
+                          <td className="py-3">{getText(r, ["ville", "city"])}</td>
+                          <td className="py-3">{getText(r, ["arrivee", "date_arrivee", "checkin", "check_in"])} → {getText(r, ["depart", "date_depart", "checkout", "check_out"])}</td>
+                          <td className="py-3">{getNumber(r, ["voyageurs", "guests"], 1)}</td>
+                          <td className="py-3">{getText(r, ["paiement", "payment", "mode_paiement"])}</td>
+                          <td className="py-3 font-black">{formatMad(getNumber(r, ["total", "montant", "prix_total", "amount"], 0))}</td>
+                          <td className="py-3"><span className="rounded-full bg-[#f4ead7] px-3 py-1 text-xs font-black text-[#7a3d14]">{getText(r, ["statut", "status"])}</span></td>
+                          <td className="py-3">
+                            <div className="flex flex-wrap gap-2">
+                              <button onClick={() => changerStatut(id, "Confirmée")} className="rounded-full bg-#3F7D3B px-3 py-2 text-xs font-black text-white">Confirmer</button>
+                              <button onClick={() => changerStatut(id, "Annulée")} className="rounded-full bg-amber-600 px-3 py-2 text-xs font-black text-white">Annuler</button>
+                              <button onClick={() => supprimerReservation(id)} className="rounded-full bg-red-700 px-3 py-2 text-xs font-black text-white">Supprimer</button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {reservationsFiltrees.length === 0 && <tr><td colSpan={8} className="py-8 text-center font-bold text-[#7a6446]">Aucune réservation pour ce filtre.</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </section>
+      </div>
+    </main>
+  );
+}

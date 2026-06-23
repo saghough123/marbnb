@@ -117,7 +117,7 @@ export default function AdminDashboardPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <a href="/" className="text-sm font-black text-[#c1121f]">← Accueil</a>
           <div className="flex flex-wrap gap-2">
-            <a href="/admin-demandes" className="rounded-full bg-[#0f2f22] px-5 py-2 text-sm font-black text-white">Demandes</a>
+            <a href="/admin-demandes" className="rounded-full bg-[#3F7D3B] px-5 py-2 text-sm font-black text-white">Demandes</a>
             <a href="/admin-logements" className="rounded-full bg-[#7a3d14] px-5 py-2 text-sm font-black text-white">Logements</a><a href="/admin-utilisateurs" className="rounded-full bg-[#c1121f] px-5 py-2 text-sm font-black text-white">Utilisateurs</a><a href="/admin-reservations" className="rounded-full bg-[#c1121f] px-5 py-2 text-sm font-black text-white">Réservations</a>
             <button onClick={chargerDashboard} className="rounded-full bg-white px-5 py-2 text-sm font-black text-[#7a3d14] ring-1 ring-[#e5d3b3]">Actualiser</button>
             <button onClick={deconnexion} className="rounded-full bg-red-700 px-5 py-2 text-sm font-black text-white">Déconnexion</button>

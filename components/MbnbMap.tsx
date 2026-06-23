@@ -66,7 +66,7 @@ export default function MarbnbMap({ ville, quartier, titre, className = "" }: Ma
           href={openUrl}
           target="_blank"
           rel="noreferrer"
-          className="rounded-full bg-[#0f2f22] px-4 py-2 text-sm font-black text-white"
+          className="rounded-full bg-[#3F7D3B] px-4 py-2 text-sm font-black text-white"
         >
           Ouvrir la carte
         </a>

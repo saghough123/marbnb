@@ -95,7 +95,7 @@ export default function AdminUtilisateursPage() {
       <section className="mx-auto max-w-7xl rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3]">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <a href="/admin-dashboard" className="font-black text-[#c1121f]">← Dashboard</a>
-          <div className="flex flex-wrap gap-2"><button onClick={synchroniserCompteLocal} className="rounded-full bg-[#c1121f] px-5 py-2 text-sm font-black text-white">Synchroniser mon compte</button><button onClick={charger} className="rounded-full bg-[#0f2f22] px-5 py-2 text-sm font-black text-white">Actualiser</button></div>
+          <div className="flex flex-wrap gap-2"><button onClick={synchroniserCompteLocal} className="rounded-full bg-[#c1121f] px-5 py-2 text-sm font-black text-white">Synchroniser mon compte</button><button onClick={charger} className="rounded-full bg-[#3F7D3B] px-5 py-2 text-sm font-black text-white">Actualiser</button></div>
         </div>
 
         <p className="mt-6 font-black text-[#c1121f]">Admin Marbnb</p>

@@ -37,7 +37,7 @@ export default function InstallationPage() {
             Les modifications restent centralisées sur le site web. Pour modifier les logements, réservations et demandes, utilisez l’espace Admin.
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
-            <a href="/admin-dashboard" className="rounded-full bg-[#0f2f22] px-6 py-3 font-black text-white">Ouvrir Admin</a>
+            <a href="/admin-dashboard" className="rounded-full bg-[#3F7D3B] px-6 py-3 font-black text-white">Ouvrir Admin</a>
             <a href="/resultats" className="rounded-full bg-white px-6 py-3 font-black text-[#7a3d14] ring-1 ring-[#e5d3b3]">Explorer</a>
           </div>
         </div>

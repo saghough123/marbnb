@@ -1,0 +1,322 @@
+
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { useParams, useSearchParams } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
+import MbnbMap from "@/components/MbnbMap";
+
+type Logement = Record<string, any>;
+
+function parsePhotos(value: string | null | undefined, imageUrl?: string | null) {
+  if (value) {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) return parsed.filter(Boolean);
+    } catch {
+      return [value];
+    }
+  }
+  return imageUrl ? [imageUrl] : [];
+}
+
+function addDaysISO(dateISO: string, days: number) {
+  const d = new Date(dateISO || todayISO());
+  if (Number.isNaN(d.getTime())) return todayISO();
+  d.setDate(d.getDate() + days);
+  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+}
+
+function todayISO() {
+  const d = new Date();
+  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+}
+
+function nuitsEntre(a: string, d: string) {
+  const diff = Math.round((new Date(d).getTime() - new Date(a).getTime()) / 86400000);
+  return diff > 0 ? diff : 1;
+}
+
+function formatMad(value: number) {
+  return new Intl.NumberFormat("fr-MA", { maximumFractionDigits: 0 }).format(value) + " MAD";
+}
+
+function getValue(row: Logement | null, keys: string[], fallback = "") {
+  if (!row) return fallback;
+  for (const key of keys) {
+    const value = row[key];
+    if (value !== undefined && value !== null && String(value).trim() !== "") return String(value);
+  }
+  return fallback;
+}
+
+function getNumber(row: Logement | null, keys: string[], fallback = 0) {
+  if (!row) return fallback;
+  for (const key of keys) {
+    const value = Number(row[key]);
+    if (!Number.isNaN(value) && value > 0) return value;
+  }
+  return fallback;
+}
+
+export default function LogementDetailPage() {
+  const params = useParams<{ id: string }>();
+  const search = useSearchParams();
+  const rawId = decodeURIComponent(String(params.id || "")).trim();
+
+  const [logement, setLogement] = useState<Logement | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [photoActive, setPhotoActive] = useState(0);
+
+  const [arrivee, setArrivee] = useState(search.get("arrivee") || todayISO());
+  const [depart, setDepart] = useState(search.get("depart") || addDaysISO(search.get("arrivee") || todayISO(), 1));
+  const [voyageurs, setVoyageurs] = useState(Math.max(1, Number(search.get("voyageurs") || 1)));
+  const [paiement, setPaiement] = useState("ligne");
+  const [clientNom, setClientNom] = useState("");
+  const [clientTelephone, setClientTelephone] = useState("");
+  const [clientEmail, setClientEmail] = useState("");
+  const [heureArrivee, setHeureArrivee] = useState("");
+  const [clientMessage, setClientMessage] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  // MARBNB_AUTO_DEPART_J1 : séjour minimum d’une nuit
+  useEffect(() => {
+    const start = new Date(arrivee).getTime();
+    const end = new Date(depart).getTime();
+    if (!Number.isNaN(start) && (Number.isNaN(end) || end <= start)) {
+      setDepart(addDaysISO(arrivee, 1));
+    }
+  }, [arrivee]);
+  const [checkingDisponibilite, setCheckingDisponibilite] = useState(false);
+  const [disponibiliteVerifiee, setDisponibiliteVerifiee] = useState(false);
+
+  useEffect(() => {
+    // reset disponibilité
+    setDisponibiliteVerifiee(false);
+  }, [arrivee, depart, voyageurs]);
+
+  useEffect(() => {
+    async function charger() {
+      setLoading(true);
+      setMessage("");
+
+      if (!rawId || rawId === "undefined" || rawId === "null" || rawId === "ID") {
+        setMessage("Lien logement invalide. Retourne aux résultats et clique sur Voir détails.");
+        setLogement(null);
+        setLoading(false);
+        return;
+      }
+
+      // Important : on garde l'id en texte pour supporter les id numériques et UUID.
+      const { data, error } = await supabase
+        .from("logements")
+        .select("*")
+        .eq("id", rawId)
+        .maybeSingle();
+
+      if (error) {
+        setMessage("Erreur technique : " + error.message);
+        setLogement(null);
+      } else if (!data) {
+        setMessage("Logement introuvable ou indisponible. Vérifie que le logement existe encore dans l’admin.");
+        setLogement(null);
+      } else {
+        setLogement(data);
+        setMessage("");
+      }
+      setLoading(false);
+    }
+    charger();
+  }, [rawId]);
+
+  const imageUrl = getValue(logement, ["image_url", "photo", "image"], "");
+  const photos = useMemo(() => parsePhotos(getValue(logement, ["photos"], ""), imageUrl), [logement, imageUrl]);
+  const titre = getValue(logement, ["titre", "title", "nom"], "Logement Marbnb");
+  const ville = getValue(logement, ["ville", "city"], "Maroc");
+  const quartier = getValue(logement, ["quartier", "district"], "");
+  const type = getValue(logement, ["type_logement", "type"], "Logement");
+  const description = getValue(logement, ["description"], "Un logement agréable pour profiter pleinement de votre séjour.");
+  const prixNuit = getNumber(logement, ["prix", "price"], 0);
+  const chambres = getNumber(logement, ["chambres", "rooms"], 1);
+  const maxVoyageurs = getNumber(logement, ["voyageurs", "guests"], 1);
+
+  const nuits = nuitsEntre(arrivee, depart);
+  const sousTotal = prixNuit * nuits;
+  const frais = paiement === "espece" ? Math.round(sousTotal * 0.05) : 0;
+  const total = sousTotal + frais;
+
+
+  async function verifierDisponibilite() {
+    if (!logement) return;
+    setMessage("");
+    setCheckingDisponibilite(true);
+    const { data, error } = await supabase.from("reservations").select("*").eq("logement_id", logement.id);
+    setCheckingDisponibilite(false);
+    if (error) { setMessage("Impossible de vérifier les disponibilités : " + error.message); return; }
+    const start = new Date(arrivee).getTime();
+    const end = new Date(depart).getTime();
+    const conflit = (data || []).some((r: any) => {
+      const statut = String(r.statut || r.status || "").toLowerCase();
+      if (statut.includes("annul")) return false;
+      const rStart = new Date(r.arrivee || r.date_arrivee || r.checkin || r.check_in || "").getTime();
+      const rEnd = new Date(r.depart || r.date_depart || r.checkout || r.check_out || "").getTime();
+      if (Number.isNaN(rStart) || Number.isNaN(rEnd)) return false;
+      return start < rEnd && end > rStart;
+    });
+    if (conflit) { setDisponibiliteVerifiee(false); setMessage("Ce logement n’est pas disponible sur ces dates. Essayez une autre période."); return; }
+    setDisponibiliteVerifiee(true);
+    setMessage("Disponible ✅ Vous pouvez confirmer la réservation.");
+  }
+
+  async function reserver() {
+    if (!logement) return;
+    setMessage("");
+
+    if (!disponibiliteVerifiee) {
+      setMessage("Veuillez d’abord vérifier les disponibilités avant de confirmer.");
+      return;
+    }
+
+    if (!clientNom.trim() || !clientTelephone.trim()) {
+      setMessage("Merci de renseigner votre nom et téléphone avant de réserver.");
+      return;
+    }
+
+    setSaving(true);
+    const { error } = await supabase.from("reservations").insert({
+      logement_id: logement.id,
+      logement_titre: titre,
+      ville,
+      arrivee,
+      depart,
+      voyageurs,
+      paiement,
+      devise: "MAD",
+      total,
+      statut: paiement === "ligne" ? "Payée en ligne" : "Pré-confirmée",
+      client_nom: clientNom.trim(),
+      client_telephone: clientTelephone.trim(),
+      client_email: clientEmail.trim(),
+      client_message: clientMessage.trim(),
+      heure_arrivee: heureArrivee,
+    });
+    setSaving(false);
+
+    if (error) {
+      setMessage("Erreur réservation : " + error.message);
+      return;
+    }
+
+    const confirmParams = new URLSearchParams({
+      titre,
+      ville,
+      arrivee,
+      depart,
+      voyageurs: String(voyageurs),
+      total: String(total),
+      paiement,
+      devise: "MAD",
+      statut: paiement === "ligne" ? "Payée en ligne" : "Pré-confirmée",
+      nom: clientNom.trim(),
+      telephone: clientTelephone.trim(),
+    });
+    window.location.href = "/reservation-confirmation?" + confirmParams.toString();
+  }
+
+  if (loading) return <main className="min-h-screen bg-[#f4ead7] p-8 font-black">Chargement du logement...</main>;
+
+  if (!logement) {
+    return (
+      <main className="min-h-screen bg-[#f4ead7] p-8 text-[#1e1b18]">
+        <a href="/resultats" className="font-black text-[#c1121f]">← Retour résultats</a>
+        <p className="mt-6 max-w-2xl rounded-2xl bg-[#fff8ec] p-5 font-black ring-1 ring-[#e5d3b3]">{message}</p>
+      </main>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-[#f4ead7] text-[#1e1b18]">
+      <header className="sticky top-0 z-30 border-b border-[#e5d3b3] bg-[#fff8ec]/95 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
+          <a href="/" className="text-3xl font-black"><span className="text-[#c1121f]">M</span>bnb</a>
+          <a href="/resultats" className="rounded-full bg-[#0f2f22] px-5 py-2 text-sm font-black text-white">Résultats</a>
+        </div>
+      </header>
+
+      <section className="mx-auto max-w-7xl px-4 py-8">
+        <a href="/resultats" className="text-sm font-black text-[#c1121f]">← Retour aux résultats</a>
+        <div className="mt-5 grid gap-8 lg:grid-cols-[1fr_390px]">
+          <div>
+            <div className="rounded-[2rem] bg-[#fff8ec] p-5 shadow-sm ring-1 ring-[#e5d3b3]">
+              <div className="overflow-hidden rounded-[1.5rem] bg-white">
+                {photos.length > 0 ? <img src={photos[photoActive] || photos[0]} alt={titre} className="h-[420px] w-full object-cover" /> : <div className="grid h-[420px] place-items-center bg-[#f4ead7] font-bold text-[#7a6446]">Pas de photo</div>}
+              </div>
+              {photos.length > 1 && (
+                <div className="mt-4 grid grid-cols-3 gap-3 md:grid-cols-5">
+                  {photos.slice(0, 10).map((photo, index) => (
+                    <button key={photo} onClick={() => setPhotoActive(index)} className={`overflow-hidden rounded-2xl ring-2 ${photoActive === index ? "ring-[#c1121f]" : "ring-transparent"}`}>
+                      <img src={photo} alt="Photo logement" className="h-24 w-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <section className="mt-6 rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3]">
+              <p className="font-black text-[#c1121f]">{type}</p>
+              <h1 className="mt-2 text-4xl font-black">{titre}</h1>
+              <p className="mt-2 text-[#7a6446]">{quartier ? `${quartier}, ` : ""}{ville}</p>
+              <div className="mt-5 grid gap-3 text-sm md:grid-cols-3">
+                <div className="rounded-2xl bg-white p-4 ring-1 ring-[#e5d3b3]"><b>{chambres}</b><br />chambre(s)</div>
+                <div className="rounded-2xl bg-white p-4 ring-1 ring-[#e5d3b3]"><b>{maxVoyageurs}</b><br />voyageurs max</div>
+                <div className="rounded-2xl bg-white p-4 ring-1 ring-[#e5d3b3]"><b>{formatMad(prixNuit)}</b><br />par nuit</div>
+              </div>
+              <p className="mt-6 leading-8 text-[#5f4b32]">{description}</p>
+            </section>
+
+
+            <MbnbMap ville={ville} quartier={quartier} titre={titre} className="mt-6" />
+          </div>
+
+          <aside className="h-fit rounded-[2rem] bg-[#fff8ec] p-5 shadow-sm ring-1 ring-[#e5d3b3]">
+            <h2 className="text-2xl font-black">Réserver ce logement</h2>
+            <div className="mt-4 grid gap-3">
+              <div><label className="text-xs font-black text-[#7a3d14]">Arrivée</label><input type="date" value={arrivee} onChange={(e) => setArrivee(e.target.value)} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" /></div>
+              <div><label className="text-xs font-black text-[#7a3d14]">Départ</label><input type="date" value={depart} onChange={(e) => setDepart(e.target.value)} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" /></div>
+              <div><label className="text-xs font-black text-[#7a3d14]">Voyageurs</label><input type="number" min={1} value={voyageurs} onChange={(e) => setVoyageurs(Math.max(1, Number(e.target.value) || 1))} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" /></div>
+            </div>
+
+            <div className="mt-4 grid gap-2">
+              <button onClick={() => setPaiement("ligne")} className={`rounded-2xl border p-4 text-left ${paiement === "ligne" ? "border-[#0f2f22] bg-green-50" : "bg-white"}`}><b>Paiement en ligne</b><p className="text-sm text-[#7a6446]">Sans frais supplémentaires.</p></button>
+              <button onClick={() => setPaiement("espece")} className={`rounded-2xl border p-4 text-left ${paiement === "espece" ? "border-[#0f2f22] bg-green-50" : "bg-white"}`}><b>Espèces sur place</b><p className="text-sm text-[#7a6446]">Frais de service 5%.</p></button>
+            </div>
+
+            <div className="mt-5 rounded-2xl bg-white p-4 ring-1 ring-[#e5d3b3]">
+              <h3 className="font-black">Vos informations</h3>
+              <div className="mt-3 grid gap-3">
+                <input value={clientNom} onChange={(e) => setClientNom(e.target.value)} placeholder="Nom complet *" className="rounded-2xl border px-4 py-3 outline-none" />
+                <input value={clientTelephone} onChange={(e) => setClientTelephone(e.target.value)} placeholder="Téléphone *" className="rounded-2xl border px-4 py-3 outline-none" />
+                <input value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} placeholder="Email" className="rounded-2xl border px-4 py-3 outline-none" />
+                <input value={heureArrivee} onChange={(e) => setHeureArrivee(e.target.value)} placeholder="Heure d’arrivée approximative" className="rounded-2xl border px-4 py-3 outline-none" />
+                <textarea value={clientMessage} onChange={(e) => setClientMessage(e.target.value)} placeholder="Message optionnel" rows={3} className="rounded-2xl border px-4 py-3 outline-none" />
+              </div>
+            </div>
+
+            <div className="mt-5 rounded-2xl bg-[#f4ead7] p-4 text-sm">
+              <div className="flex justify-between"><span>{formatMad(prixNuit)} x {nuits} nuit(s)</span><span>{formatMad(sousTotal)}</span></div>
+              <div className="mt-2 flex justify-between"><span>{paiement === "espece" ? "Frais service" : "Frais paiement"}</span><span>{formatMad(frais)}</span></div>
+              <div className="mt-3 flex justify-between border-t border-[#e5d3b3] pt-3 text-lg font-black"><span>Total</span><span>{formatMad(total)}</span></div>
+            </div>
+
+            {message && <p className="mt-4 rounded-2xl bg-amber-50 p-3 text-sm font-bold text-amber-700">{message}</p>}
+            <button onClick={verifierDisponibilite} disabled={checkingDisponibilite} className="mt-5 w-full rounded-2xl bg-[#0f2f22] px-6 py-4 font-black text-white disabled:opacity-60">{checkingDisponibilite ? "Vérification..." : disponibiliteVerifiee ? "Disponibilité vérifiée ✅" : "Vérifier les disponibilités"}</button>
+            <button onClick={reserver} disabled={saving || !disponibiliteVerifiee} className="mt-3 w-full rounded-2xl bg-[#c1121f] px-6 py-4 font-black text-white disabled:opacity-50">{saving ? "Enregistrement..." : "Confirmer la réservation"}</button>
+          </aside>
+        </div>
+      </section>
+    </main>
+  );
+}
