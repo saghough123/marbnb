@@ -20,14 +20,6 @@ function parsePhotos(value: string | null | undefined, imageUrl?: string | null)
   return imageUrl ? [imageUrl] : [];
 }
 
-function addDaysISO(dateISO: string, days: number) {
-  const d = new Date(dateISO || todayISO());
-  if (Number.isNaN(d.getTime())) return todayISO();
-  d.setDate(d.getDate() + days);
-  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
-  return local.toISOString().slice(0, 10);
-}
-
 function todayISO() {
   const d = new Date();
   const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
@@ -72,7 +64,7 @@ export default function LogementDetailPage() {
   const [photoActive, setPhotoActive] = useState(0);
 
   const [arrivee, setArrivee] = useState(search.get("arrivee") || todayISO());
-  const [depart, setDepart] = useState(search.get("depart") || addDaysISO(search.get("arrivee") || todayISO(), 1));
+  const [depart, setDepart] = useState(search.get("depart") || todayISO());
   const [voyageurs, setVoyageurs] = useState(Math.max(1, Number(search.get("voyageurs") || 1)));
   const [paiement, setPaiement] = useState("ligne");
   const [clientNom, setClientNom] = useState("");
@@ -81,15 +73,6 @@ export default function LogementDetailPage() {
   const [heureArrivee, setHeureArrivee] = useState("");
   const [clientMessage, setClientMessage] = useState("");
   const [saving, setSaving] = useState(false);
-
-  // MARBNB_AUTO_DEPART_J1 : séjour minimum d’une nuit
-  useEffect(() => {
-    const start = new Date(arrivee).getTime();
-    const end = new Date(depart).getTime();
-    if (!Number.isNaN(start) && (Number.isNaN(end) || end <= start)) {
-      setDepart(addDaysISO(arrivee, 1));
-    }
-  }, [arrivee]);
   const [checkingDisponibilite, setCheckingDisponibilite] = useState(false);
   const [disponibiliteVerifiee, setDisponibiliteVerifiee] = useState(false);
 

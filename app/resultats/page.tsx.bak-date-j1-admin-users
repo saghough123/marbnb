@@ -2,22 +2,6 @@
 "use client"; import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient"; type Devise = "MAD" | "EUR" | "USD" | "GBP" | "CAD" | "AED";
-
-function todayISO() {
-  const d = new Date();
-  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
-  return local.toISOString().slice(0, 10);
-}
-
-function addDaysISO(dateISO: string, days: number) {
-  const base = dateISO && dateISO.trim() ? dateISO : todayISO();
-  const d = new Date(base);
-  if (Number.isNaN(d.getTime())) return todayISO();
-  d.setDate(d.getDate() + days);
-  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
-  return local.toISOString().slice(0, 10);
-}
-
 type Paiement = "espece" | "ligne"; type Logement = { id: number; titre: string; ville: string; quartier: string | null; type_logement: string | null; prix: number | null; chambres: number | null; voyageurs: number | null; description: string | null; image_url: string | null; photos: string | null; statut: string | null;
 }; const tauxDevise: Record<Devise, number> = { MAD: 1, EUR: 0.092, USD: 0.1, GBP: 0.078, CAD: 0.137, AED: 0.367,
 }; const symbole: Record<Devise, string> = { MAD: "MAD", EUR: "€", USD: "$", GBP: "£", CAD: "C$", AED: "AED",
@@ -25,15 +9,6 @@ type Paiement = "espece" | "ligne"; type Logement = { id: number; titre: string;
 } function nuitsEntre(a: string, d: string) { const diff = Math.round((new Date(d).getTime() - new Date(a).getTime()) / 86400000); return diff > 0 ? diff : 1;
 } function prix(mad: number, devise: Devise) { const v = Math.round(mad * tauxDevise[devise]); return devise === "MAD" ? `${v} MAD` : `${symbole[devise]} ${v}`;
 } function ResultatsContent() { const params = useSearchParams(); const [destination, setDestination] = useState(params.get("destination") || ""); const [arrivee, setArrivee] = useState(params.get("arrivee") || dateAujourdhuiISO()); const [depart, setDepart] = useState(dateAujourdhuiISO()); const [voyageurs, setVoyageurs] = useState(Math.max(1, Number(params.get("voyageurs") || 1))); const [villeRapide, setVilleRapide] = useState("Toutes"); const [type, setType] = useState("Tous"); const [prixMax, setPrixMax] = useState(2500); const [paiement, setPaiement] = useState<Paiement>("ligne"); const [devise, setDevise] = useState<Devise>("MAD"); const [message, setMessage] = useState("");
-
-  // MARBNB_RESULTATS_AUTO_DEPART_J1 : séjour minimum d’une nuit
-  useEffect(() => {
-    const start = new Date(arrivee).getTime();
-    const end = new Date(depart).getTime();
-    if (!Number.isNaN(start) && (Number.isNaN(end) || end <= start)) {
-      setDepart(addDaysISO(arrivee, 1));
-    }
-  }, [arrivee]);
   const [clientNom, setClientNom] = useState("");
   const [clientTelephone, setClientTelephone] = useState("");
   const [clientEmail, setClientEmail] = useState("");

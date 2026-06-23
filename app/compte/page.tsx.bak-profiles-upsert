@@ -6,17 +6,6 @@ import { supabase } from "@/lib/supabaseClient";
 type Mode = "connexion" | "creation";
 type Role = "locataire" | "hote";
 
-async function upsertProfile(account: any) {
-  if (!account?.id) return;
-  await supabase.from("profiles").upsert({
-    id: account.id,
-    nom: account.nom || "",
-    email: account.email || "",
-    telephone: account.telephone || "",
-    role: account.role || "locataire",
-  });
-}
-
 export default function ComptePage() {
   const [mode, setMode] = useState<Mode>("connexion");
   const [role, setRole] = useState<Role>("locataire");
@@ -57,7 +46,6 @@ export default function ComptePage() {
       if (error) { setMessage("Erreur création compte : " + error.message); return; }
       const account = { id: data.user?.id, nom: nom.trim(), email: email.trim(), telephone: telephone.trim(), role };
       localStorage.setItem("marbnb_account", JSON.stringify(account));
-      await upsertProfile(account);
       window.dispatchEvent(new Event("marbnb:account-changed"));
       setMessage("Compte créé ✅ Vous pouvez maintenant utiliser Marbnb avec votre profil.");
       return;

@@ -2,22 +2,6 @@
 "use client"; import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient"; type Devise = "MAD" | "EUR" | "USD" | "GBP" | "CAD" | "AED";
-
-function todayISO() {
-  const d = new Date();
-  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
-  return local.toISOString().slice(0, 10);
-}
-
-function addDaysISO(dateISO: string, days: number) {
-  const base = dateISO && dateISO.trim() ? dateISO : todayISO();
-  const d = new Date(base);
-  if (Number.isNaN(d.getTime())) return todayISO();
-  d.setDate(d.getDate() + days);
-  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
-  return local.toISOString().slice(0, 10);
-}
-
 type Paiement = "espece" | "ligne"; type Logement = { id: number; titre: string; ville: string; quartier: string | null; type_logement: string | null; prix: number | null; chambres: number | null; voyageurs: number | null; description: string | null; image_url: string | null; photos: string | null; statut: string | null;
 }; const tauxDevise: Record<Devise, number> = { MAD: 1, EUR: 0.092, USD: 0.1, GBP: 0.078, CAD: 0.137, AED: 0.367,
 }; const symbole: Record<Devise, string> = { MAD: "MAD", EUR: "€", USD: "$", GBP: "£", CAD: "C$", AED: "AED",

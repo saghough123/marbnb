@@ -63,7 +63,7 @@ export default function AdminReservationsPage() {
     setLoading(false);
   }
 
-  async function changerStatut(id: string | number, statut: string) {
+  async function changerStatut(id: number, statut: string) {
     const { error } = await supabase.from("reservations").update({ statut }).eq("id", id);
     if (error) {
       setMessage("Erreur modification statut : " + error.message);
@@ -73,7 +73,7 @@ export default function AdminReservationsPage() {
     setMessage("Statut réservation modifié ✅");
   }
 
-  async function supprimerReservation(id: string | number) {
+  async function supprimerReservation(id: number) {
     const ok = window.confirm("Supprimer définitivement cette réservation ?");
     if (!ok) return;
 
@@ -156,9 +156,9 @@ export default function AdminReservationsPage() {
                   </thead>
                   <tbody>
                     {reservationsFiltrees.map((r) => {
-                      const id = String(r.id);
+                      const id = Number(r.id);
                       return (
-                        <tr key={String(id)} className="border-b last:border-0 align-top">
+                        <tr key={id} className="border-b last:border-0 align-top">
                           <td className="py-3 font-bold">{getText(r, ["logement_titre", "titre", "logement", "property_title", "nom_logement"])}</td>
                           <td className="py-3">{getText(r, ["ville", "city"])}</td>
                           <td className="py-3">{getText(r, ["arrivee", "date_arrivee", "checkin", "check_in"])} → {getText(r, ["depart", "date_depart", "checkout", "check_out"])}</td>

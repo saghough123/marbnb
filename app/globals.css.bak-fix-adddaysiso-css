@@ -171,22 +171,22 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 0 4px rgba(193, 18, 31, 0.08) !important;
 }
 
-[class~="rounded-[2rem]"] {
+.rounded-[2rem] {
   box-shadow: 0 18px 45px rgba(87, 55, 24, 0.06);
 }
 
-[class~="bg-[#fff8ec]"] {
+.bg-[#fff8ec] {
   background-color: rgba(255, 248, 236, 0.96) !important;
 }
 
-[class~="ring-[#e5d3b3]"], [class~="border-[#e5d3b3]"] {
+.ring-[#e5d3b3], .border-[#e5d3b3] {
   border-color: rgba(210, 176, 122, 0.72) !important;
 }
 
 @media (max-width: 767px) {
   .text-5xl { font-size: 2.45rem !important; line-height: 1.05 !important; }
   .text-4xl { font-size: 2rem !important; line-height: 1.08 !important; }
-  [class~="rounded-[2rem]"] { border-radius: 1.45rem !important; }
+  .rounded-[2rem] { border-radius: 1.45rem !important; }
 }
 /* MBNB_POLISH_DESIGN_END */
 
