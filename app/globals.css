@@ -241,3 +241,56 @@ a[class*="bg-[#3F7D3B]"]:hover {
   background-size: cover !important;
   background-position: center !important;
 }
+
+
+/* MARBNB_SECONDARY_HERO_IMAGE */
+[data-marbnb-secondary-hero="true"] {
+  background-image: url('/marbnb-hero-secondary.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+
+/* MARBNB_HOME_SOFT_GRADIENT_BG */
+.marbnb-home-soft-gradient {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 248, 236, 0.25) 0%,
+      rgba(255, 244, 225, 0.75) 18%,
+      rgba(252, 234, 205, 0.95) 42%,
+      rgba(250, 225, 188, 0.98) 70%,
+      rgba(246, 214, 165, 1) 100%
+    ) !important;
+  min-height: 100vh;
+}
+
+/* Transition douce entre l'image du haut et le contenu */
+.marbnb-home-soft-gradient::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 360px;
+  height: 280px;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 248, 236, 0) 0%,
+    rgba(255, 248, 236, 0.55) 45%,
+    rgba(255, 244, 225, 0.96) 100%
+  );
+  z-index: 0;
+}
+
+.marbnb-home-soft-gradient > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Adoucit les cartes sur le nouveau fond */
+.marbnb-home-soft-gradient [class*="bg-white"],
+.marbnb-home-soft-gradient [class*="bg-[#fff8ec]"],
+.marbnb-home-soft-gradient [class*="bg-[#fffaf2]"] {
+  box-shadow: 0 18px 50px rgba(122, 61, 20, 0.08);
+}
