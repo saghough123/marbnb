@@ -1,54 +1,76 @@
-
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import MbnbMap from "@/components/MbnbMap";
 
-type Logement = Record<string, any>;
+type Devise = "MAD" | "EUR" | "USD" | "GBP" | "CAD" | "AED";
+type Paiement = "espece" | "ligne";
 
-function parsePhotos(value: string | null | undefined, imageUrl?: string | null) {
-  const raw: string[] = [];
+type Logement = {
+  id: number;
+  titre: string;
+  ville: string;
+  quartier: string | null;
+  type_logement: string | null;
+  prix: number | null;
+  chambres: number | null;
+  voyageurs: number | null;
+  description: string | null;
+  image_url: string | null;
+  photos: string | null;
+  statut: string | null;
+};
 
-  if (value) {
-    try {
-      const parsed = JSON.parse(value);
-      if (Array.isArray(parsed)) raw.push(...parsed.filter(Boolean).map(String));
-      else if (typeof parsed === "string") raw.push(parsed);
-    } catch {
-      raw.push(value);
-    }
+const fallbackImages = [
+  "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1400&q=80",
+  "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1400&q=80",
+  "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1400&q=80",
+  "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80",
+  "https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=1400&q=80",
+  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=80",
+];
+
+const tauxDevise: Record<Devise, number> = {
+  MAD: 1,
+  EUR: 0.092,
+  USD: 0.1,
+  GBP: 0.078,
+  CAD: 0.137,
+  AED: 0.367,
+};
+
+const symbole: Record<Devise, string> = {
+  MAD: "MAD",
+  EUR: "€",
+  USD: "$",
+  GBP: "£",
+  CAD: "C$",
+  AED: "AED",
+};
+
+function parsePhotos(value: string | null | undefined) {
+  if (!value) return [] as string[];
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) return parsed.filter(Boolean).map(String);
+    return parsed ? [String(parsed)] : [];
+  } catch {
+    return value ? [value] : [];
   }
-
-  if (imageUrl) raw.unshift(imageUrl);
-
-  const clean = raw
-    .map((x) => String(x || "").trim())
-    .filter(Boolean)
-    // éviter que l'image hero, le logo ou une icône app deviennent des photos de logement
-    .filter((url) => !url.includes("marbnb-hero-mix"))
-    .filter((url) => !url.includes("mbnb-logo"))
-    .filter((url) => !url.includes("marbnb-logo"))
-    .filter((url) => !url.includes("apple-touch-icon"))
-    .filter((url) => !url.includes("favicon"))
-    // on garde les vraies URLs web, les chemins /storage et /uploads
-    .filter((url) => url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/storage") || url.startsWith("/uploads") || url.startsWith("/logements"))
-    .filter((url, index, arr) => arr.indexOf(url) === index);
-
-  return clean;
-}
-
-function addDaysISO(dateISO: string, days: number) {
-  const d = new Date(dateISO || todayISO());
-  if (Number.isNaN(d.getTime())) return todayISO();
-  d.setDate(d.getDate() + days);
-  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
-  return local.toISOString().slice(0, 10);
 }
 
 function todayISO() {
   const d = new Date();
+  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+}
+
+function addDaysISO(dateISO: string, days: number) {
+  const base = dateISO && dateISO.trim() ? dateISO : todayISO();
+  const d = new Date(base);
+  if (Number.isNaN(d.getTime())) return todayISO();
+  d.setDate(d.getDate() + days);
   const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
   return local.toISOString().slice(0, 10);
 }
@@ -58,205 +80,99 @@ function nuitsEntre(a: string, d: string) {
   return diff > 0 ? diff : 1;
 }
 
-function formatMad(value: number) {
-  return new Intl.NumberFormat("fr-MA", { maximumFractionDigits: 0 }).format(value) + " MAD";
+function formatPrix(mad: number, devise: Devise) {
+  const v = Math.round(mad * tauxDevise[devise]);
+  return devise === "MAD" ? `${v.toLocaleString("fr-FR")} MAD` : `${symbole[devise]} ${v.toLocaleString("fr-FR")}`;
 }
 
-function getValue(row: Logement | null, keys: string[], fallback = "") {
-  if (!row) return fallback;
-  for (const key of keys) {
-    const value = row[key];
-    if (value !== undefined && value !== null && String(value).trim() !== "") return String(value);
-  }
-  return fallback;
-}
-
-function getNumber(row: Logement | null, keys: string[], fallback = 0) {
-  if (!row) return fallback;
-  for (const key of keys) {
-    const value = Number(row[key]);
-    if (!Number.isNaN(value) && value > 0) return value;
-  }
-  return fallback;
-}
-
-
-function getFallbackGalleryByTitle(title: string) {
-  const galleries: Record<string, string[]> = {
-  "Appartement moderne Maarif": [
-    "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=80",
-    "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1600210492493-0946911123ea?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=80"
-  ],
-  "Studio proche Corniche": [
-    "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1400&q=80",
-    "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1560448075-bb485b067938?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80"
-  ],
-  "Villa familiale avec piscine": [
-    "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1400&q=80",
-    "https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
-  ],
-  "Riad traditionnel au centre": [
-    "https://images.unsplash.com/photo-1548019979-0d243fc2a803?auto=format&fit=crop&w=1400&q=80",
-    "https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1549144511-f099e773c147?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1604014237800-1c9102c219da?auto=format&fit=crop&w=1200&q=80"
-  ]
-};
-  const found = Object.keys(galleries).find((key) => title.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(title.toLowerCase()));
-  return found ? galleries[found] : galleries["Appartement moderne Maarif"];
-}
-
-export default function LogementDetailPage() {
+function DetailLogementContent() {
   const params = useParams<{ id: string }>();
-  const search = useSearchParams();
-  const rawId = decodeURIComponent(String(params.id || "")).trim();
+  const searchParams = useSearchParams();
+  const logementId = Number(params.id);
 
   const [logement, setLogement] = useState<Logement | null>(null);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
-  const [photoActive, setPhotoActive] = useState(0);
-
-  const [arrivee, setArrivee] = useState(search.get("arrivee") || todayISO());
-  const [depart, setDepart] = useState(search.get("depart") || addDaysISO(search.get("arrivee") || todayISO(), 1));
-  const [voyageurs, setVoyageurs] = useState(Math.max(1, Number(search.get("voyageurs") || 1)));
-  const [paiement, setPaiement] = useState("ligne");
+  const [erreur, setErreur] = useState("");
+  const [arrivee, setArrivee] = useState(searchParams.get("arrivee") || todayISO());
+  const [depart, setDepart] = useState(searchParams.get("depart") || addDaysISO(searchParams.get("arrivee") || todayISO(), 1));
+  const [voyageurs, setVoyageurs] = useState(Math.max(1, Number(searchParams.get("voyageurs") || 1)));
+  const [paiement, setPaiement] = useState<Paiement>("ligne");
+  const [devise, setDevise] = useState<Devise>("MAD");
   const [clientNom, setClientNom] = useState("");
   const [clientTelephone, setClientTelephone] = useState("");
   const [clientEmail, setClientEmail] = useState("");
-  const [heureArrivee, setHeureArrivee] = useState("");
   const [clientMessage, setClientMessage] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [heureArrivee, setHeureArrivee] = useState("");
+  const [message, setMessage] = useState("");
+  const [photoActive, setPhotoActive] = useState(0);
 
-  // MARBNB_AUTO_DEPART_J1 : séjour minimum d’une nuit
   useEffect(() => {
     const start = new Date(arrivee).getTime();
     const end = new Date(depart).getTime();
     if (!Number.isNaN(start) && (Number.isNaN(end) || end <= start)) {
       setDepart(addDaysISO(arrivee, 1));
     }
-  }, [arrivee]);
-  const [checkingDisponibilite, setCheckingDisponibilite] = useState(false);
-  const [disponibiliteVerifiee, setDisponibiliteVerifiee] = useState(false);
+  }, [arrivee, depart]);
 
   useEffect(() => {
-    // reset disponibilité
-    setDisponibiliteVerifiee(false);
-  }, [arrivee, depart, voyageurs]);
-
-  useEffect(() => {
-    async function charger() {
+    async function chargerLogement() {
       setLoading(true);
-      setMessage("");
-
-      if (!rawId || rawId === "undefined" || rawId === "null" || rawId === "ID") {
-        setMessage("Lien logement invalide. Retourne aux résultats et clique sur Voir détails.");
-        setLogement(null);
-        setLoading(false);
-        return;
-      }
-
-      // Important : on garde l'id en texte pour supporter les id numériques et UUID.
+      setErreur("");
       const { data, error } = await supabase
         .from("logements")
-        .select("*")
-        .eq("id", rawId)
-        .maybeSingle();
+        .select("id,titre,ville,quartier,type_logement,prix,chambres,voyageurs,description,image_url,photos,statut")
+        .eq("id", logementId)
+        .single();
 
       if (error) {
-        setMessage("Erreur technique : " + error.message);
-        setLogement(null);
-      } else if (!data) {
-        setMessage("Logement introuvable ou indisponible. Vérifie que le logement existe encore dans l’admin.");
+        setErreur(error.message);
         setLogement(null);
       } else {
-        setLogement(data);
-        setMessage("");
+        setLogement(data as Logement);
       }
       setLoading(false);
     }
-    charger();
-  }, [rawId]);
 
-  const detailFallbackImages = [
-    "https://images.unsplash.com/photo-1577147443647-81856d5151af?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=80",
-  ];
-  const imageUrl = getValue(logement, ["image_url", "photo", "image"], detailFallbackImages[0]);
-  const photos = useMemo(() => parsePhotos(getValue(logement, ["photos"], ""), imageUrl), [logement, imageUrl]);
-  const photosAffichees = photos.length > 0 ? photos : detailFallbackImages;
-  const photosUniquesAffichees = photosAffichees.filter((p, i, arr) => arr.indexOf(p) === i);
-  const titre = getValue(logement, ["titre", "title", "nom"], "Logement Marbnb");
-  const ville = getValue(logement, ["ville", "city"], "Maroc");
-  const quartier = getValue(logement, ["quartier", "district"], "");
-  const type = getValue(logement, ["type_logement", "type"], "Logement");
-  const description = getValue(logement, ["description"], "Un logement agréable pour profiter pleinement de votre séjour.");
-  const prixNuit = getNumber(logement, ["prix", "price"], 0);
-  const chambres = getNumber(logement, ["chambres", "rooms"], 1);
-  const maxVoyageurs = getNumber(logement, ["voyageurs", "guests"], 1);
+    if (Number.isFinite(logementId)) chargerLogement();
+    else {
+      setErreur("Identifiant logement invalide.");
+      setLoading(false);
+    }
+  }, [logementId]);
 
   const nuits = nuitsEntre(arrivee, depart);
-  const sousTotal = prixNuit * nuits;
-  const frais = paiement === "espece" ? Math.round(sousTotal * 0.05) : 0;
-  const total = sousTotal + frais;
+  const prixNuit = Number(logement?.prix || 0);
+  const prixSejour = prixNuit * nuits;
+  const frais = paiement === "espece" ? Math.round(prixSejour * 0.05) : 0;
+  const total = prixSejour + frais;
+  const maxVoyageurs = Number(logement?.voyageurs || 1);
 
+  const photos = useMemo(() => {
+    if (!logement) return fallbackImages;
+    const photosBase = parsePhotos(logement.photos);
+    const list = [logement.image_url, ...photosBase].filter(Boolean) as string[];
+    const unique = Array.from(new Set(list));
+    return unique.length > 0 ? unique : fallbackImages;
+  }, [logement]);
 
-  async function verifierDisponibilite() {
+  async function confirmerReservation() {
     if (!logement) return;
     setMessage("");
-    setCheckingDisponibilite(true);
-    const { data, error } = await supabase.from("reservations").select("*").eq("logement_id", logement.id);
-    setCheckingDisponibilite(false);
-    if (error) { setMessage("Impossible de vérifier les disponibilités : " + error.message); return; }
-    const start = new Date(arrivee).getTime();
-    const end = new Date(depart).getTime();
-    const conflit = (data || []).some((r: any) => {
-      const statut = String(r.statut || r.status || "").toLowerCase();
-      if (statut.includes("annul")) return false;
-      const rStart = new Date(r.arrivee || r.date_arrivee || r.checkin || r.check_in || "").getTime();
-      const rEnd = new Date(r.depart || r.date_depart || r.checkout || r.check_out || "").getTime();
-      if (Number.isNaN(rStart) || Number.isNaN(rEnd)) return false;
-      return start < rEnd && end > rStart;
-    });
-    if (conflit) { setDisponibiliteVerifiee(false); setMessage("Ce logement n’est pas disponible sur ces dates. Essayez une autre période."); return; }
-    setDisponibiliteVerifiee(true);
-    setMessage("Disponible ✅ Vous pouvez confirmer la réservation.");
-  }
-
-  async function reserver() {
-    if (!logement) return;
-    setMessage("");
-
-    if (!disponibiliteVerifiee) {
-      setMessage("Veuillez d’abord vérifier les disponibilités avant de confirmer.");
-      return;
-    }
 
     if (!clientNom.trim() || !clientTelephone.trim()) {
-      setMessage("Merci de renseigner votre nom et téléphone avant de réserver.");
+      setMessage("Merci de renseigner au minimum votre nom et votre téléphone.");
       return;
     }
 
-    setSaving(true);
     const { error } = await supabase.from("reservations").insert({
       logement_id: logement.id,
-      logement_titre: titre,
-      ville,
+      logement_titre: logement.titre,
+      ville: logement.ville,
       arrivee,
       depart,
       voyageurs,
       paiement,
-      devise: "MAD",
+      devise,
       total,
       statut: paiement === "ligne" ? "Payée en ligne" : "Pré-confirmée",
       client_nom: clientNom.trim(),
@@ -265,120 +181,166 @@ export default function LogementDetailPage() {
       client_message: clientMessage.trim(),
       heure_arrivee: heureArrivee,
     });
-    setSaving(false);
 
     if (error) {
-      setMessage("Erreur réservation : " + error.message);
+      setMessage(`Erreur réservation : ${error.message}`);
       return;
     }
 
     const confirmParams = new URLSearchParams({
-      titre,
-      ville,
+      titre: logement.titre || "Logement Marbnb",
+      ville: logement.ville || "Maroc",
       arrivee,
       depart,
       voyageurs: String(voyageurs),
       total: String(total),
       paiement,
-      devise: "MAD",
+      devise: paiement === "ligne" ? devise : "MAD",
       statut: paiement === "ligne" ? "Payée en ligne" : "Pré-confirmée",
-      nom: clientNom.trim(),
-      telephone: clientTelephone.trim(),
     });
     window.location.href = "/reservation-confirmation?" + confirmParams.toString();
   }
 
-  if (loading) return <main className="min-h-screen bg-[#f4ead7] p-8 font-black">Chargement du logement...</main>;
-
-  if (!logement) {
+  if (loading) {
     return (
-      <main className="min-h-screen bg-[#f4ead7] p-8 text-[#1e1b18]">
-        <a href="/resultats" className="font-black text-[#c1121f]">← Retour résultats</a>
-        <p className="mt-6 max-w-2xl rounded-2xl bg-[#fff8ec] p-5 font-black ring-1 ring-[#e5d3b3]">{message}</p>
-      </main>
+      <div className="min-h-screen bg-[#f7efe2] px-4 py-16 text-[#1e1b18]">
+        <div className="mx-auto max-w-4xl rounded-[2rem] bg-[#fff8ec] p-8 text-center shadow-sm ring-1 ring-[#e5d3b3]">
+          <p className="font-black">Chargement du logement...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (erreur || !logement) {
+    return (
+      <div className="min-h-screen bg-[#f7efe2] px-4 py-16 text-[#1e1b18]">
+        <div className="mx-auto max-w-4xl rounded-[2rem] bg-red-50 p-8 text-center shadow-sm ring-1 ring-red-100">
+          <p className="text-xl font-black text-red-700">Logement introuvable</p>
+          <p className="mt-2 text-red-700">{erreur || "Aucune donnée disponible."}</p>
+          <a href="/resultats" className="mt-5 inline-flex rounded-2xl bg-[#3F7D3B] px-6 py-3 font-black text-white">Retour aux résultats</a>
+        </div>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#f4ead7] text-[#1e1b18]">
-      <header className="sticky top-0 z-30 border-b border-[#e5d3b3] bg-[#fff8ec]/95 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-          <a href="/" className="text-3xl font-black"><span className="text-[#c1121f]">M</span>bnb</a>
-          <a href="/resultats" className="rounded-full bg-[#3F7D3B] px-5 py-2 text-sm font-black text-white">Résultats</a>
-        </div>
-      </header>
-
-      <section className="mx-auto max-w-7xl px-4 py-8">
-        <a href="/resultats" className="text-sm font-black text-[#c1121f]">← Retour aux résultats</a>
-        <div className="mt-5 grid gap-8 lg:grid-cols-[1fr_390px]">
+    <div className="min-h-screen bg-[#f7efe2] text-[#1e1b18]">
+      <main className="mx-auto max-w-7xl px-4 py-8 md:py-10">
+        <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <div className="rounded-[2rem] bg-[#fff8ec] p-5 shadow-sm ring-1 ring-[#e5d3b3]">
-              <div className="overflow-hidden rounded-[1.5rem] bg-white">
-                {photosAffichees.length > 0 ? <img src={photosUniquesAffichees[photoActive] || photosUniquesAffichees[0]} alt={titre} className="h-[420px] w-full object-cover" /> : <div className="grid h-[420px] place-items-center bg-[#f4ead7] font-bold text-[#7a6446]">Pas de photo</div>}
-              </div>
-              {photosUniquesAffichees.length > 1 && (
-                <div className="mt-4 grid grid-cols-3 gap-3 md:grid-cols-5">
-                  {photosUniquesAffichees.slice(0, 10).map((photo, index) => (
-                    <button key={photo} onClick={() => setPhotoActive(index)} className={`overflow-hidden rounded-2xl ring-2 ${photoActive === index ? "ring-[#c1121f]" : "ring-transparent"}`}>
-                      <img src={photo} alt="Photo logement" className="h-24 w-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              )}
+            <a href="/resultats" className="inline-flex rounded-full border border-[#e5d3b3] bg-[#fff8ec] px-4 py-2 text-sm font-black text-[#7a6446] hover:bg-white">
+              ← Retour aux résultats
+            </a>
+            <p className="mt-5 inline-flex rounded-full bg-[#EAF3E4] px-4 py-2 text-sm font-black text-[#3F7D3B]">
+              {logement.type_logement || "Logement"} · Marbnb vérifié
+            </p>
+            <h1 className="mt-4 max-w-4xl text-4xl font-black tracking-tight md:text-6xl">{logement.titre}</h1>
+            <p className="mt-3 text-[#7a6446]">{logement.quartier || "Centre"}, {logement.ville} · ⭐ 4.8 · Séjour premium</p>
+          </div>
+          <div className="rounded-[2rem] bg-[#fff8ec] px-5 py-4 text-sm shadow-sm ring-1 ring-[#e5d3b3]">
+            <p className="text-[#7a6446]">À partir de</p>
+            <p className="text-2xl font-black">{prixNuit.toLocaleString("fr-FR")} MAD <span className="text-sm font-medium text-[#7a6446]">/ nuit</span></p>
+          </div>
+        </div>
+
+        <section className="grid gap-3 lg:grid-cols-[1.4fr_0.8fr]">
+          <div className="overflow-hidden rounded-[2rem] bg-[#fff8ec] shadow-sm ring-1 ring-[#e5d3b3]">
+            <img src={photos[photoActive] || fallbackImages[0]} alt={logement.titre} className="h-[460px] w-full object-cover" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {photos.slice(0, 4).map((photo, index) => (
+              <button key={`${photo}-${index}`} onClick={() => setPhotoActive(index)} className={`overflow-hidden rounded-[1.5rem] ring-2 transition ${photoActive === index ? "ring-[#3F7D3B]" : "ring-transparent hover:ring-[#e5d3b3]"}`}>
+                <img src={photo} alt={`Photo ${index + 1}`} className="h-[222px] w-full object-cover" />
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-8 grid gap-8 lg:grid-cols-[1fr_390px]">
+          <div>
+            <div className="rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3]">
+              <h2 className="text-2xl font-black">À propos de ce logement</h2>
+              <p className="mt-4 leading-8 text-[#5f4b32]">
+                {logement.description || "Logement sélectionné par Marbnb pour offrir une expérience confortable, pratique et authentique au Maroc."}
+              </p>
             </div>
 
-            <section className="mt-6 rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3]">
-              <p className="font-black text-[#c1121f]">{type}</p>
-              <h1 className="mt-2 text-4xl font-black">{titre}</h1>
-              <p className="mt-2 text-[#7a6446]">{quartier ? `${quartier}, ` : ""}{ville}</p>
-              <div className="mt-5 grid gap-3 text-sm md:grid-cols-3">
-                <div className="rounded-2xl bg-white p-4 ring-1 ring-[#e5d3b3]"><b>{chambres}</b><br />chambre(s)</div>
-                <div className="rounded-2xl bg-white p-4 ring-1 ring-[#e5d3b3]"><b>{maxVoyageurs}</b><br />voyageurs max</div>
-                <div className="rounded-2xl bg-white p-4 ring-1 ring-[#e5d3b3]"><b>{formatMad(prixNuit)}</b><br />par nuit</div>
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              <div className="rounded-[2rem] bg-[#fff8ec] p-5 shadow-sm ring-1 ring-[#e5d3b3]"><p className="text-sm text-[#7a6446]">Voyageurs</p><p className="mt-1 text-2xl font-black">{maxVoyageurs}</p></div>
+              <div className="rounded-[2rem] bg-[#fff8ec] p-5 shadow-sm ring-1 ring-[#e5d3b3]"><p className="text-sm text-[#7a6446]">Chambres</p><p className="mt-1 text-2xl font-black">{logement.chambres || 1}</p></div>
+              <div className="rounded-[2rem] bg-[#fff8ec] p-5 shadow-sm ring-1 ring-[#e5d3b3]"><p className="text-sm text-[#7a6446]">Ville</p><p className="mt-1 text-2xl font-black">{logement.ville}</p></div>
+            </div>
+
+            <div className="mt-6 rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3]">
+              <h2 className="text-2xl font-black">Équipements populaires</h2>
+              <div className="mt-5 grid gap-3 md:grid-cols-2">
+                {["Wi‑Fi", "Climatisation", "Cuisine équipée", "Sécurité", "Arrivée flexible", "Support Marbnb"].map((item) => (
+                  <div key={item} className="rounded-2xl border border-[#ead9ba] bg-white p-4 font-bold">✓ {item}</div>
+                ))}
               </div>
-              <p className="mt-6 leading-8 text-[#5f4b32]">{description}</p>
-            </section>
+            </div>
 
-
-            <MbnbMap ville={ville} quartier={quartier} titre={titre} className="mt-6" />
+            <div className="mt-6 rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3]">
+              <h2 className="text-2xl font-black">Avis voyageurs</h2>
+              <div className="mt-5 grid gap-4 md:grid-cols-2">
+                <div className="rounded-2xl bg-white p-5 ring-1 ring-[#ead9ba]"><p className="font-black">⭐ 4.8 / 5</p><p className="mt-2 text-sm leading-6 text-[#7a6446]">Logement bien situé, propre et conforme à la description.</p></div>
+                <div className="rounded-2xl bg-white p-5 ring-1 ring-[#ead9ba]"><p className="font-black">Service Marbnb</p><p className="mt-2 text-sm leading-6 text-[#7a6446]">Réservation simple, informations claires et suivi pratique.</p></div>
+              </div>
+            </div>
           </div>
 
-          <aside className="h-fit rounded-[2rem] bg-[#fff8ec] p-5 shadow-sm ring-1 ring-[#e5d3b3]">
-            <h2 className="text-2xl font-black">Réserver ce logement</h2>
-            <div className="mt-4 grid gap-3">
-              <div><label className="text-xs font-black text-[#7a3d14]">Arrivée</label><input type="date" value={arrivee} onChange={(e) => setArrivee(e.target.value)} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" /></div>
-              <div><label className="text-xs font-black text-[#7a3d14]">Départ</label><input type="date" value={depart} onChange={(e) => setDepart(e.target.value)} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" /></div>
-              <div><label className="text-xs font-black text-[#7a3d14]">Voyageurs</label><input type="number" min={1} value={voyageurs} onChange={(e) => setVoyageurs(Math.max(1, Number(e.target.value) || 1))} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none" /></div>
-            </div>
-
-            <div className="mt-4 grid gap-2">
-              <button onClick={() => setPaiement("ligne")} className={`rounded-2xl border p-4 text-left ${paiement === "ligne" ? "border-[#3F7D3B] bg-[#EAF3E4]" : "bg-white"}`}><b>Paiement en ligne</b><p className="text-sm text-[#7a6446]">Sans frais supplémentaires.</p></button>
-              <button onClick={() => setPaiement("espece")} className={`rounded-2xl border p-4 text-left ${paiement === "espece" ? "border-[#3F7D3B] bg-[#EAF3E4]" : "bg-white"}`}><b>Espèces sur place</b><p className="text-sm text-[#7a6446]">Frais de service 5%.</p></button>
-            </div>
-
-            <div className="mt-5 rounded-2xl bg-white p-4 ring-1 ring-[#e5d3b3]">
-              <h3 className="font-black">Vos informations</h3>
-              <div className="mt-3 grid gap-3">
-                <input value={clientNom} onChange={(e) => setClientNom(e.target.value)} placeholder="Nom complet *" className="rounded-2xl border px-4 py-3 outline-none" />
-                <input value={clientTelephone} onChange={(e) => setClientTelephone(e.target.value)} placeholder="Téléphone *" className="rounded-2xl border px-4 py-3 outline-none" />
-                <input value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} placeholder="Email" className="rounded-2xl border px-4 py-3 outline-none" />
-                <input value={heureArrivee} onChange={(e) => setHeureArrivee(e.target.value)} placeholder="Heure d’arrivée approximative" className="rounded-2xl border px-4 py-3 outline-none" />
-                <textarea value={clientMessage} onChange={(e) => setClientMessage(e.target.value)} placeholder="Message optionnel" rows={3} className="rounded-2xl border px-4 py-3 outline-none" />
+          <aside className="h-fit rounded-[2rem] bg-[#fff8ec] p-5 shadow-xl ring-1 ring-[#e5d3b3] lg:sticky lg:top-6">
+            <div className="flex items-end justify-between gap-3">
+              <div>
+                <p className="text-sm text-[#7a6446]">Prix par nuit</p>
+                <p className="text-3xl font-black">{prixNuit.toLocaleString("fr-FR")} MAD</p>
               </div>
+              <p className="rounded-full bg-[#EAF3E4] px-3 py-1 text-sm font-black text-[#3F7D3B]">⭐ 4.8</p>
             </div>
 
-            <div className="mt-5 rounded-2xl bg-[#f4ead7] p-4 text-sm">
-              <div className="flex justify-between"><span>{formatMad(prixNuit)} x {nuits} nuit(s)</span><span>{formatMad(sousTotal)}</span></div>
-              <div className="mt-2 flex justify-between"><span>{paiement === "espece" ? "Frais service" : "Frais paiement"}</span><span>{formatMad(frais)}</span></div>
-              <div className="mt-3 flex justify-between border-t border-[#e5d3b3] pt-3 text-lg font-black"><span>Total</span><span>{formatMad(total)}</span></div>
+            <div className="mt-5 overflow-hidden rounded-2xl border border-[#e5d3b3] bg-white">
+              <div className="grid grid-cols-2 border-b border-[#e5d3b3]">
+                <label className="p-3"><span className="text-xs font-black">ARRIVÉE</span><input type="date" value={arrivee} onChange={(e) => setArrivee(e.target.value)} className="mt-1 w-full bg-transparent outline-none" /></label>
+                <label className="border-l border-[#e5d3b3] p-3"><span className="text-xs font-black">DÉPART</span><input type="date" value={depart} onChange={(e) => setDepart(e.target.value)} className="mt-1 w-full bg-transparent outline-none" /></label>
+              </div>
+              <label className="block p-3"><span className="text-xs font-black">VOYAGEURS</span><input type="number" min={1} max={maxVoyageurs} value={voyageurs} onChange={(e) => setVoyageurs(Math.max(1, Math.min(maxVoyageurs, Number(e.target.value) || 1)))} className="mt-1 w-full bg-transparent outline-none" /></label>
             </div>
 
-            {message && <p className="mt-4 rounded-2xl bg-amber-50 p-3 text-sm font-bold text-amber-700">{message}</p>}
-            <button onClick={verifierDisponibilite} disabled={checkingDisponibilite} className="mt-5 w-full rounded-2xl bg-[#3F7D3B] px-6 py-4 font-black text-white disabled:opacity-60">{checkingDisponibilite ? "Vérification..." : disponibiliteVerifiee ? "Disponibilité vérifiée ✅" : "Vérifier les disponibilités"}</button>
-            <button onClick={reserver} disabled={saving || !disponibiliteVerifiee} className="mt-3 w-full rounded-2xl bg-[#c1121f] px-6 py-4 font-black text-white disabled:opacity-50">{saving ? "Enregistrement..." : "Confirmer la réservation"}</button>
+            <div className="mt-4 grid gap-3">
+              <button onClick={() => setPaiement("ligne")} className={`rounded-2xl border p-4 text-left ${paiement === "ligne" ? "border-[#3F7D3B] bg-[#EAF3E4]" : "bg-white"}`}><b>💳 Paiement flexible</b><p className="text-sm text-[#7a6446]">Sans frais supplémentaires.</p></button>
+              <button onClick={() => setPaiement("espece")} className={`rounded-2xl border p-4 text-left ${paiement === "espece" ? "border-[#3F7D3B] bg-[#EAF3E4]" : "bg-white"}`}><b>💵 Paiement sur place</b><p className="text-sm text-[#7a6446]">Frais de service Marbnb : 5%.</p></button>
+              {paiement === "ligne" && <select value={devise} onChange={(e) => setDevise(e.target.value as Devise)} className="rounded-2xl border bg-white px-4 py-3"><option value="MAD">MAD</option><option value="EUR">EUR</option><option value="USD">USD</option><option value="GBP">GBP</option><option value="CAD">CAD</option><option value="AED">AED</option></select>}
+            </div>
+
+            <div className="mt-5 space-y-3 text-sm">
+              <div className="flex justify-between"><span>{prixNuit.toLocaleString("fr-FR")} MAD x {nuits} nuit(s)</span><span>{prixSejour.toLocaleString("fr-FR")} MAD</span></div>
+              <div className="flex justify-between"><span>{paiement === "espece" ? "Frais service 5%" : "Frais paiement en ligne"}</span><span>{paiement === "ligne" ? "0 MAD" : `${frais.toLocaleString("fr-FR")} MAD`}</span></div>
+              <div className="flex justify-between border-t border-[#e5d3b3] pt-3 text-lg font-black"><span>Total</span><span>{formatPrix(total, paiement === "ligne" ? devise : "MAD")}</span></div>
+            </div>
+
+            <div className="mt-5 grid gap-3 rounded-2xl bg-white p-4 ring-1 ring-[#ead9ba]">
+              <input value={clientNom} onChange={(e) => setClientNom(e.target.value)} placeholder="Nom complet *" className="rounded-2xl border px-4 py-3 outline-none focus:border-[#3F7D3B]" />
+              <input value={clientTelephone} onChange={(e) => setClientTelephone(e.target.value)} placeholder="Téléphone *" className="rounded-2xl border px-4 py-3 outline-none focus:border-[#3F7D3B]" />
+              <input value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} placeholder="Email" className="rounded-2xl border px-4 py-3 outline-none focus:border-[#3F7D3B]" />
+              <input value={heureArrivee} onChange={(e) => setHeureArrivee(e.target.value)} placeholder="Heure d’arrivée" className="rounded-2xl border px-4 py-3 outline-none focus:border-[#3F7D3B]" />
+              <textarea value={clientMessage} onChange={(e) => setClientMessage(e.target.value)} placeholder="Message optionnel" rows={3} className="rounded-2xl border px-4 py-3 outline-none focus:border-[#3F7D3B]" />
+            </div>
+
+            <button onClick={confirmerReservation} className="mt-5 w-full rounded-2xl bg-[#c1121f] py-4 font-black text-white shadow-lg transition hover:bg-[#a50f1a]">
+              {paiement === "ligne" ? "Réserver maintenant" : "Pré-confirmer la réservation"}
+            </button>
+            {message && <p className="mt-4 rounded-2xl bg-[#EAF3E4] p-3 text-sm font-bold text-[#3F7D3B]">{message}</p>}
           </aside>
-        </div>
-      </section>
-    </main>
+        </section>
+      </main>
+    </div>
+  );
+}
+
+export default function DetailLogementPage() {
+  return (
+    <Suspense fallback={<div className="p-8">Chargement...</div>}>
+      <DetailLogementContent />
+    </Suspense>
   );
 }
