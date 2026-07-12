@@ -1,0 +1,186 @@
+/* MARBNB_UI_FULL_FIX_V3 */
+:root{
+  --mb-ink:#17130f;
+  --mb-text:#211b15;
+  --mb-muted:#332b22;
+  --mb-cream:#fffdf8;
+  --mb-sand:#f7efe2;
+  --mb-card:rgba(255,255,255,.86);
+  --mb-border:#eadcc2;
+  --mb-gold:#c59b54;
+  --mb-terra:#b85c38;
+  --mb-green:#2f6f34;
+}
+
+body{
+  background:linear-gradient(180deg,var(--mb-cream) 0%,var(--mb-sand) 100%)!important;
+  color:var(--mb-ink)!important;
+}
+
+/* Hero accueil/resultats clair et lisible */
+.marbnb-home-readable,
+.marbnb-results-readable,
+.marbnb-clean-hero,
+.marbnb-premium-hero{
+  background:#fffdf8!important;
+  isolation:isolate;
+  position:relative;
+}
+
+.marbnb-home-readable img,
+.marbnb-results-readable img,
+.marbnb-clean-hero img,
+.marbnb-premium-hero img,
+img.marbnb-hero-bg{
+  filter:brightness(1.04) saturate(.90) contrast(.94)!important;
+}
+
+.marbnb-home-readable::before,
+.marbnb-results-readable::before,
+.marbnb-clean-hero::before,
+.marbnb-premium-hero::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(255,253,248,.76) 0%,rgba(255,253,248,.54) 38%,rgba(255,253,248,.22) 70%,rgba(255,253,248,.08) 100%),
+    linear-gradient(180deg,rgba(255,253,248,.08) 0%,rgba(255,253,248,.04) 48%,rgba(255,253,248,.62) 100%)!important;
+}
+
+.marbnb-home-readable .bg-gradient-to-r,
+.marbnb-home-readable .bg-gradient-to-t,
+.marbnb-home-readable .bg-gradient-to-b,
+.marbnb-results-readable .bg-gradient-to-r,
+.marbnb-results-readable .bg-gradient-to-t,
+.marbnb-results-readable .bg-gradient-to-b,
+.marbnb-clean-hero .bg-gradient-to-r,
+.marbnb-clean-hero .bg-gradient-to-t,
+.marbnb-clean-hero .bg-gradient-to-b{
+  background:none!important;
+}
+
+.marbnb-home-readable > *,
+.marbnb-results-readable > *,
+.marbnb-clean-hero > *,
+.marbnb-premium-hero > *{position:relative;z-index:2;}
+
+.marbnb-home-readable .max-w-4xl,
+.marbnb-home-readable .max-w-3xl,
+.marbnb-results-readable .max-w-3xl,
+.marbnb-hero-text-panel{
+  max-width:min(780px,100%);
+  padding:1.35rem 1.55rem;
+  border-radius:1.8rem;
+  background:rgba(255,255,255,.78)!important;
+  border:1px solid rgba(234,220,194,.86)!important;
+  box-shadow:0 22px 70px rgba(126,93,45,.15)!important;
+  backdrop-filter:blur(12px);
+}
+
+.marbnb-home-readable h1,
+.marbnb-home-readable h2,
+.marbnb-results-readable h1,
+.marbnb-results-readable h2,
+.marbnb-clean-hero h1,
+.marbnb-clean-hero h2,
+.marbnb-premium-hero h1,
+.marbnb-premium-hero h2{
+  color:var(--mb-ink)!important;
+  text-shadow:0 2px 0 rgba(255,255,255,.78),0 12px 28px rgba(255,255,255,.66)!important;
+  line-height:.98!important;
+}
+
+.marbnb-home-readable p,
+.marbnb-results-readable p,
+.marbnb-clean-hero p,
+.marbnb-premium-hero p{
+  color:var(--mb-text)!important;
+  font-weight:700!important;
+  text-shadow:0 1px 0 rgba(255,255,255,.85)!important;
+}
+
+.marbnb-hero-readable-text{
+  display:inline-block!important;
+  max-width:760px;
+  padding:.75rem 1rem;
+  border-radius:1.25rem;
+  background:rgba(255,255,255,.68)!important;
+  border:1px solid rgba(234,220,194,.70)!important;
+  backdrop-filter:blur(8px);
+  color:var(--mb-text)!important;
+  font-weight:750!important;
+}
+
+.marbnb-premium-signature,
+.marbnb-light-signature,
+.marbnb-home-readable p.inline-flex,
+.marbnb-results-readable p.inline-flex{
+  color:#714a16!important;
+  background:rgba(255,255,255,.88)!important;
+  border:1px solid rgba(197,155,84,.45)!important;
+  box-shadow:0 10px 28px rgba(126,93,45,.10)!important;
+}
+
+/* Barre recherche et cartes */
+.marbnb-home-readable div[class*="bg-[#fff8ec]"],
+.marbnb-results-readable div[class*="bg-[#fff8ec]"],
+.bg-\[\#fff8ec\]{
+  background:rgba(255,255,255,.94)!important;
+}
+
+article.rounded-\[2rem\],
+.marbnb-card-premium,
+.rounded-3xl.bg-white,
+section[class*="bg-[#fff8ec]"],
+section[class*="bg-\[\#fff8ec\]"]{
+  background:rgba(255,255,255,.94)!important;
+  border:1px solid rgba(234,220,194,.90)!important;
+  box-shadow:0 16px 42px rgba(126,93,45,.09)!important;
+}
+
+/* Boutons villes: Explorer visible */
+.marbnb-city-pill p,
+button.marbnb-city-pill p,
+.marbnb-city-pill span,
+button.marbnb-city-pill span{
+  color:#fff!important;
+  opacity:1!important;
+  font-weight:900!important;
+  text-shadow:0 1px 10px rgba(0,0,0,.20)!important;
+}
+button.marbnb-city-pill,
+.marbnb-city-pill{
+  background:linear-gradient(135deg,#b85c38,#c59b54)!important;
+  color:#fff!important;
+}
+
+/* Textes gris plus fonces */
+.text-\[\#7a6446\],.text-\[\#5f4b32\],.text-\[\#5d513e\],.text-\[\#6f604d\]{color:var(--mb-muted)!important;}
+
+input,select,textarea{
+  background:rgba(255,255,255,.98)!important;
+  border-color:var(--mb-border)!important;
+  color:var(--mb-ink)!important;
+}
+
+/* Page favoris */
+.marbnb-favoris-page{
+  min-height:calc(100vh - 92px);
+  background:linear-gradient(180deg,#fffdf8 0%,#f7efe2 100%);
+  color:var(--mb-ink);
+}
+.marbnb-favoris-card{
+  background:rgba(255,255,255,.95);
+  border:1px solid var(--mb-border);
+  box-shadow:0 18px 46px rgba(126,93,45,.10);
+}
+
+@media(max-width:768px){
+  .marbnb-home-readable .max-w-4xl,
+  .marbnb-home-readable .max-w-3xl,
+  .marbnb-results-readable .max-w-3xl,
+  .marbnb-hero-text-panel{padding:1rem;border-radius:1.4rem;}
+  .marbnb-home-readable h1,.marbnb-home-readable h2,.marbnb-results-readable h1,.marbnb-results-readable h2{line-height:1.05!important;}
+}

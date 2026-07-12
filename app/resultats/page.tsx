@@ -226,7 +226,7 @@ function ResultatsContent() {
             <h1 className="mt-5 text-4xl font-black tracking-tight text-[#28231d]  md:text-6xl">
               Trouvez votre séjour idéal au Maroc.
             </h1>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-[#5d513e] md:text-lg">
+            <p className="marbnb-hero-readable-text mt-4 max-w-2xl text-base leading-7 text-[#5d513e] md:text-lg">
               Riads lumineux, villas privées, studios design et appartements vérifiés dans une atmosphère marocaine premium.
             </p>
           </div>
