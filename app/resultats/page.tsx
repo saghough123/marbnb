@@ -212,7 +212,7 @@ function ResultatsContent() {
 
   return (
     <div className="min-h-screen bg-[#f7efe2] text-[#1e1b18]">
-      <section className="marbnb-clean-hero relative overflow-hidden border-b border-[#ead9ba]">
+      <section className="marbnb-results-readable marbnb-clean-hero relative overflow-hidden border-b border-[#ead9ba]">
         <div className="absolute inset-0">
           <img src="/marbnb-hero-mix.png" alt="Décor marocain" className="h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-white/10 to-[#fffdf8]" />
@@ -224,7 +224,7 @@ function ResultatsContent() {
               Marbnb · Luxury Moroccan Stays
             </p>
             <h1 className="mt-5 text-4xl font-black tracking-tight text-[#28231d]  md:text-6xl">
-              Trouvez le logement idéal pour votre expérience au Maroc.
+              Trouvez votre séjour idéal au Maroc.
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-7 text-[#5d513e] md:text-lg">
               Riads lumineux, villas privées, studios design et appartements vérifiés dans une atmosphère marocaine premium.

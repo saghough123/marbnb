@@ -1,0 +1,156 @@
+/* MARBNB_HERO_READABLE_V2
+   Objectif: page accueil claire + hero resultats lisible.
+*/
+:root{
+  --mb-ink:#17130f;
+  --mb-text:#211b15;
+  --mb-muted:#332b22;
+  --mb-cream:#fffdf8;
+  --mb-card:rgba(255,255,255,.82);
+  --mb-border:#eadcc2;
+  --mb-gold:#c59b54;
+  --mb-terra:#b85c38;
+}
+
+body{background:linear-gradient(180deg,#fffdf8 0%,#f7efe2 100%)!important;color:var(--mb-ink)!important;}
+
+/* Heroes accueil + resultats: clair, sans voile sombre et sans texte perdu */
+.marbnb-home-readable,
+.marbnb-results-readable,
+.marbnb-clean-hero,
+.marbnb-premium-hero{
+  background:#fffdf8!important;
+  isolation:isolate;
+}
+
+.marbnb-home-readable img,
+.marbnb-results-readable img,
+.marbnb-clean-hero img,
+.marbnb-premium-hero img{
+  filter:brightness(1.03) saturate(.92) contrast(.95)!important;
+}
+
+/* Calme les zones orange/rouge pour eviter que le texte se perde */
+.marbnb-home-readable::before,
+.marbnb-results-readable::before,
+.marbnb-clean-hero::before,
+.marbnb-premium-hero::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(255,253,248,.72) 0%,rgba(255,253,248,.50) 36%,rgba(255,253,248,.20) 66%,rgba(255,253,248,.08) 100%),
+    linear-gradient(180deg,rgba(255,253,248,.10) 0%,rgba(255,253,248,.04) 48%,rgba(255,253,248,.55) 100%)!important;
+}
+
+/* Supprime tous les anciens overlays qui faisaient des bandes */
+.marbnb-home-readable .bg-gradient-to-r,
+.marbnb-home-readable .bg-gradient-to-t,
+.marbnb-home-readable .bg-gradient-to-b,
+.marbnb-results-readable .bg-gradient-to-r,
+.marbnb-results-readable .bg-gradient-to-t,
+.marbnb-results-readable .bg-gradient-to-b,
+.marbnb-clean-hero .bg-gradient-to-r,
+.marbnb-clean-hero .bg-gradient-to-t,
+.marbnb-clean-hero .bg-gradient-to-b{
+  background:none!important;
+}
+
+/* Tout le contenu du hero passe au-dessus du voile clair */
+.marbnb-home-readable > *,
+.marbnb-results-readable > *,
+.marbnb-clean-hero > *,
+.marbnb-premium-hero > *{position:relative;z-index:2;}
+
+/* Bloc texte du hero */
+.marbnb-hero-text-panel,
+.marbnb-home-readable .max-w-4xl,
+.marbnb-results-readable .max-w-3xl{
+  width:fit-content;
+  max-width:min(760px,100%);
+  padding:1.35rem 1.55rem;
+  border-radius:1.8rem;
+  background:rgba(255,255,255,.74)!important;
+  border:1px solid rgba(234,220,194,.82)!important;
+  box-shadow:0 22px 70px rgba(126,93,45,.15)!important;
+  backdrop-filter:blur(12px);
+}
+
+/* Titre et paragraphe tres lisibles */
+.marbnb-home-readable h1,
+.marbnb-home-readable h2,
+.marbnb-results-readable h1,
+.marbnb-results-readable h2,
+.marbnb-clean-hero h1,
+.marbnb-clean-hero h2,
+.marbnb-premium-hero h1,
+.marbnb-premium-hero h2{
+  color:var(--mb-ink)!important;
+  text-shadow:0 2px 0 rgba(255,255,255,.75),0 12px 28px rgba(255,255,255,.65)!important;
+  line-height:.98!important;
+}
+
+.marbnb-home-readable p,
+.marbnb-results-readable p,
+.marbnb-clean-hero p,
+.marbnb-premium-hero p{
+  color:var(--mb-text)!important;
+  font-weight:700!important;
+  text-shadow:0 1px 0 rgba(255,255,255,.85)!important;
+}
+
+/* Le badge au-dessus du titre */
+.marbnb-premium-signature,
+.marbnb-light-signature,
+.marbnb-home-readable p.inline-flex,
+.marbnb-results-readable p.inline-flex{
+  color:#714a16!important;
+  background:rgba(255,255,255,.86)!important;
+  border:1px solid rgba(197,155,84,.45)!important;
+  box-shadow:0 10px 28px rgba(126,93,45,.10)!important;
+}
+
+/* Barre de recherche: bien blanche */
+.marbnb-home-readable form,
+.marbnb-results-readable form,
+.marbnb-home-readable div[class*="bg-[#fff8ec]"],
+.marbnb-results-readable div[class*="bg-[#fff8ec]"],
+.marbnb-home-readable .bg-\[\#fff8ec\],
+.marbnb-results-readable .bg-\[\#fff8ec\]{
+  background:rgba(255,255,255,.93)!important;
+  border-color:rgba(234,220,194,.96)!important;
+}
+
+/* Categories et petits boutons plus lisibles */
+.marbnb-home-readable button,
+.marbnb-results-readable button,
+.marbnb-home-readable a,
+.marbnb-results-readable a{font-weight:900!important;}
+
+/* Cartes villes: texte Explorer visible */
+.marbnb-city-pill p,
+button.marbnb-city-pill p,
+.marbnb-city-pill span,
+button.marbnb-city-pill span{
+  color:#fff!important;
+  opacity:1!important;
+  font-weight:900!important;
+  text-shadow:0 1px 10px rgba(0,0,0,.18)!important;
+}
+button.marbnb-city-pill,
+.marbnb-city-pill{
+  background:linear-gradient(135deg,#b85c38,#c59b54)!important;
+  color:#fff!important;
+}
+
+/* Textes gris globaux plus fonces */
+.text-\[\#7a6446\],.text-\[\#5f4b32\],.text-\[\#5d513e\],.text-\[\#6f604d\]{color:var(--mb-muted)!important;}
+
+@media(max-width:768px){
+  .marbnb-hero-text-panel,
+  .marbnb-home-readable .max-w-4xl,
+  .marbnb-results-readable .max-w-3xl{padding:1rem;border-radius:1.4rem;}
+  .marbnb-home-readable h1,.marbnb-home-readable h2,.marbnb-results-readable h1,.marbnb-results-readable h2{line-height:1.05!important;}
+}
