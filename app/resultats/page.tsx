@@ -212,10 +212,10 @@ function ResultatsContent() {
 
   return (
     <div className="min-h-screen bg-[#f7efe2] text-[#1e1b18]">
-      <section className="relative overflow-hidden border-b border-[#ead9ba]">
+      <section className="marbnb-clean-hero relative overflow-hidden border-b border-[#ead9ba]">
         <div className="absolute inset-0">
           <img src="/marbnb-hero-mix.png" alt="Décor marocain" className="h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/35 to-[#f7efe2]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-white/10 to-[#fffdf8]" />
         </div>
 
         <div className="relative mx-auto max-w-7xl px-4 pb-10 pt-10 md:pb-16 md:pt-16">
@@ -223,10 +223,10 @@ function ResultatsContent() {
             <p className="marbnb-premium-signature rounded-full px-4 py-2 text-sm font-bold shadow backdrop-blur">
               Marbnb · Luxury Moroccan Stays
             </p>
-            <h1 className="mt-5 text-4xl font-black tracking-tight text-white drop-shadow md:text-6xl">
+            <h1 className="mt-5 text-4xl font-black tracking-tight text-[#28231d]  md:text-6xl">
               Trouvez le logement idéal pour votre expérience au Maroc.
             </h1>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-white/90 md:text-lg">
+            <p className="mt-4 max-w-2xl text-base leading-7 text-[#5d513e] md:text-lg">
               Riads lumineux, villas privées, studios design et appartements vérifiés dans une atmosphère marocaine premium.
             </p>
           </div>
@@ -249,7 +249,7 @@ function ResultatsContent() {
                 <span className="text-xs font-black text-[#7a3d14]">Voyageurs</span>
                 <input type="number" min={1} value={voyageurs} onChange={(e) => setVoyageurs(Math.max(1, Number(e.target.value) || 1))} className="mt-1 w-full rounded-2xl border border-[#e5d3b3] bg-white px-4 py-3 outline-none focus:border-[#3F7D3B]" />
               </label>
-              <button onClick={relancerRecherche} className="rounded-2xl bg-[#c1121f] px-7 py-3 font-black text-white shadow-lg transition hover:bg-[#a50f1a] md:self-end">
+              <button onClick={relancerRecherche} className="rounded-2xl bg-[#c1121f] px-7 py-3 font-black text-[#28231d] shadow-lg transition hover:bg-[#a50f1a] md:self-end">
                 Rechercher
               </button>
             </div>
@@ -345,7 +345,7 @@ function ResultatsContent() {
                           <div className="mt-3 flex justify-between border-t pt-3 text-base font-black"><span>Total</span><span>{formatPrix(total, paiement === "ligne" ? devise : "MAD")}</span></div>
                         </div>
 
-                        <a href={`/logement/${l.id}?arrivee=${arrivee}&depart=${depart}&voyageurs=${voyageurs}`} className="mt-4 block rounded-2xl bg-[#3F7D3B] py-3 text-center font-black text-white shadow transition hover:bg-[#2f6f34]">
+                        <a href={`/logement/${l.id}?arrivee=${arrivee}&depart=${depart}&voyageurs=${voyageurs}`} className="mt-4 block rounded-2xl bg-[#3F7D3B] py-3 text-center font-black text-[#28231d] shadow transition hover:bg-[#2f6f34]">
                           Voir détails
                         </a>
                       </div>

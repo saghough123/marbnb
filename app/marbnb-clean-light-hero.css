@@ -1,0 +1,167 @@
+/* MARBNB_CLEAN_LIGHT_HERO_V2
+   But: supprimer les bandes/nuances blanches et sombres dans le hero.
+   Style: clair, propre, Maroc premium, sans voile horizontal visible.
+*/
+
+:root{
+  --mb-bg:#fffdf8;
+  --mb-sand:#f7efe2;
+  --mb-card:#ffffff;
+  --mb-border:#eadcc2;
+  --mb-gold:#c59b54;
+  --mb-gold-soft:#f7e6ba;
+  --mb-oasis:#4e754a;
+  --mb-terracotta:#b85c38;
+  --mb-text:#28231d;
+  --mb-muted:#6f604d;
+}
+
+html{scroll-behavior:smooth;}
+
+body{
+  color:var(--mb-text)!important;
+  background:linear-gradient(180deg,#fffdf8 0%,#f7efe2 100%)!important;
+}
+
+/* Motif discret, presque invisible pour ne pas fatiguer les yeux */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:-1;
+  opacity:.025;
+  background-image:radial-gradient(circle at 1px 1px, rgba(197,155,84,.55) 1px, transparent 0);
+  background-size:28px 28px;
+}
+
+/* IMPORTANT: neutralise les anciens overlays qui créaient les bandes encerclées */
+.marbnb-premium-hero::after,
+section:has(.marbnb-premium-signature)::after,
+section:has(.marbnb-light-signature)::after{
+  display:none!important;
+  content:none!important;
+  background:none!important;
+}
+
+/* Le hero ne doit plus avoir de voile horizontal au milieu */
+.marbnb-clean-hero{
+  position:relative!important;
+  overflow:hidden!important;
+  background:#fffdf8!important;
+}
+
+.marbnb-clean-hero > .absolute.inset-0::after,
+.marbnb-clean-hero > .absolute.inset-0::before{
+  display:none!important;
+  content:none!important;
+}
+
+/* Image hero: claire, naturelle, sans couche blanche coupée */
+.marbnb-clean-hero img,
+.marbnb-premium-hero img,
+img.marbnb-hero-bg{
+  filter:brightness(1.08) saturate(1.04) contrast(.98)!important;
+}
+
+/* Supprime les anciens dégradés Tailwind visibles dans le hero */
+.marbnb-clean-hero .bg-gradient-to-r,
+.marbnb-clean-hero .bg-gradient-to-t,
+.marbnb-clean-hero .bg-gradient-to-b{
+  background:none!important;
+}
+
+/* Nouveau overlay doux: aucune bande, un dégradé continu vertical */
+.marbnb-clean-hero-overlay{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg, rgba(255,253,248,.78) 0%, rgba(255,253,248,.42) 38%, rgba(255,253,248,.08) 100%),
+    linear-gradient(180deg, rgba(255,253,248,.10) 0%, rgba(255,253,248,.18) 55%, rgba(247,239,226,.92) 100%)!important;
+}
+
+/* Carte hero claire et lisible, sans gros bloc noir */
+.marbnb-clean-hero-card{
+  background:rgba(255,255,255,.72)!important;
+  border:1px solid rgba(234,220,194,.85)!important;
+  box-shadow:0 24px 70px rgba(126,93,45,.16)!important;
+  backdrop-filter:blur(16px)!important;
+  color:var(--mb-text)!important;
+}
+
+.marbnb-clean-hero-card h1,
+.marbnb-clean-hero-card h2,
+.marbnb-clean-hero-card p,
+.marbnb-clean-hero-card span{
+  color:var(--mb-text)!important;
+  text-shadow:none!important;
+}
+
+.marbnb-clean-hero-card p,
+.marbnb-clean-hero-card .text-white\/90,
+.marbnb-clean-hero-card .text-white\/85,
+.marbnb-clean-hero-card .text-white\/70{
+  color:var(--mb-muted)!important;
+}
+
+.marbnb-premium-signature,
+.marbnb-light-signature{
+  color:#7b5520!important;
+  background:rgba(255,255,255,.78)!important;
+  border:1px solid rgba(197,155,84,.45)!important;
+  box-shadow:0 10px 24px rgba(126,93,45,.10)!important;
+}
+
+/* Barres et sections */
+.bg-\[\#f4ead7\],.bg-\[\#f7efe2\]{background-color:#fffdf8!important;}
+.bg-\[\#fff8ec\]{background-color:rgba(255,255,255,.90)!important;}
+.text-\[\#1e1b18\]{color:var(--mb-text)!important;}
+.text-\[\#7a6446\]{color:var(--mb-muted)!important;}
+
+/* Cartes propres */
+article.rounded-\[2rem\],
+.marbnb-card-premium,
+.rounded-3xl.bg-white,
+section[class*="bg-[#fff8ec]"],
+section[class*="bg-\[\#fff8ec\]"]{
+  background:rgba(255,255,255,.92)!important;
+  border:1px solid rgba(234,220,194,.9)!important;
+  box-shadow:0 16px 42px rgba(126,93,45,.09)!important;
+}
+
+article.rounded-\[2rem\]:hover,
+.marbnb-card-premium:hover{
+  transform:translateY(-4px);
+  box-shadow:0 22px 58px rgba(126,93,45,.14)!important;
+}
+
+/* Boutons plus doux */
+a[class*="bg-[#c1121f]"],button[class*="bg-[#c1121f]"],
+a[class*="bg-\[\#c1121f\]"],button[class*="bg-\[\#c1121f\]"],
+a[class*="bg-[#3F7D3B]"],button[class*="bg-[#3F7D3B]"],
+a[class*="bg-\[\#3F7D3B\]"],button[class*="bg-\[\#3F7D3B\]"]{
+  background:linear-gradient(135deg,#b85c38,#c59b54)!important;
+  color:white!important;
+  box-shadow:0 10px 26px rgba(197,155,84,.22)!important;
+}
+
+input,select,textarea{
+  background:rgba(255,255,255,.96)!important;
+  border-color:var(--mb-border)!important;
+  color:var(--mb-text)!important;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--mb-gold)!important;
+  box-shadow:0 0 0 4px rgba(197,155,84,.13)!important;
+}
+
+/* Cache la fausse bande blanche qui pouvait venir des anciens masques mobile/classes */
+.marbnb-fake-menu-mask{
+  display:none!important;
+}
+
+@media(max-width:768px){
+  .marbnb-clean-hero-card{background:rgba(255,255,255,.84)!important;}
+  article.rounded-\[2rem\]:hover,.marbnb-card-premium:hover{transform:none;}
+}

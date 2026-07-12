@@ -197,12 +197,12 @@ export default function HotePage() {
         </a>
 
         <section className="mt-5 overflow-hidden rounded-[2rem] bg-[#fff8ec] shadow-sm ring-1 ring-[#e5d3b3]">
-          <div className="relative bg-[#1e1b18] px-6 py-10 text-white md:px-8">
+          <div className="relative bg-[#fff8ec] px-6 py-10 text-[#28231d] md:px-8">
             <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "url(/marbnb-hero-mix.png)", backgroundSize: "cover", backgroundPosition: "center" }} />
             <div className="relative max-w-3xl">
-              <p className="inline-flex rounded-full border border-white/30 bg-white/15 px-4 py-2 text-sm font-black backdrop-blur">Devenir hôte premium Marbnb</p>
+              <p className="inline-flex rounded-full border border-white/30 bg-white/70 px-4 py-2 text-sm font-black backdrop-blur">Devenir hôte premium Marbnb</p>
               <h1 className="mt-5 text-4xl font-black md:text-6xl">Proposer mon adresse d’exception</h1>
-              <p className="mt-4 max-w-2xl leading-7 text-white/85">
+              <p className="mt-4 max-w-2xl leading-7 text-[#5d513e]">
                 Présente ton logement avec ses équipements, ses photos et son charme. Marbnb vérifie ensuite la demande avant publication.
               </p>
             </div>
@@ -321,7 +321,7 @@ export default function HotePage() {
               </div>
             </div>
 
-            <button disabled={loading} className="rounded-2xl bg-[#3F7D3B] px-6 py-4 font-black text-white shadow-lg transition hover:bg-[#2f6f34] disabled:opacity-60 md:col-span-2">
+            <button disabled={loading} className="rounded-2xl bg-[#3F7D3B] px-6 py-4 font-black text-[#28231d] shadow-lg transition hover:bg-[#2f6f34] disabled:opacity-60 md:col-span-2">
               {loading ? "Envoi en cours..." : "Envoyer pour validation premium"}
             </button>
           </form>
