@@ -232,12 +232,12 @@ function DetailLogementContent() {
               ← Retour aux résultats
             </a>
             <p className="mt-5 inline-flex rounded-full bg-[#EAF3E4] px-4 py-2 text-sm font-black text-[#3F7D3B]">
-              {logement.type_logement || "Logement"} · Marbnb vérifié
+              {logement.type_logement || "Logement"} · Signature Marbnb
             </p>
             <h1 className="mt-4 max-w-4xl text-4xl font-black tracking-tight md:text-6xl">{logement.titre}</h1>
-            <p className="mt-3 text-[#7a6446]">{logement.quartier || "Centre"}, {logement.ville} · ⭐ 4.8 · Séjour premium</p>
+            <p className="mt-3 text-[#7a6446]">{logement.quartier || "Centre"}, {logement.ville} · ⭐ 4.8 · Expérience premium</p>
           </div>
-          <div className="rounded-[2rem] bg-[#fff8ec] px-5 py-4 text-sm shadow-sm ring-1 ring-[#e5d3b3]">
+          <div className="marbnb-card-premium rounded-[2rem] bg-[#fff8ec] px-5 py-4 text-sm shadow-sm ring-1 ring-[#e5d3b3]">
             <p className="text-[#7a6446]">À partir de</p>
             <p className="text-2xl font-black">{prixNuit.toLocaleString("fr-FR")} MAD <span className="text-sm font-medium text-[#7a6446]">/ nuit</span></p>
           </div>
@@ -258,23 +258,23 @@ function DetailLogementContent() {
 
         <section className="mt-8 grid gap-8 lg:grid-cols-[1fr_390px]">
           <div>
-            <div className="rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3]">
-              <h2 className="text-2xl font-black">À propos de ce logement</h2>
+            <div className="marbnb-card-premium rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3]">
+              <h2 className="text-2xl font-black">Une expérience à vivre</h2>
               <p className="mt-4 leading-8 text-[#5f4b32]">
                 {logement.description || "Logement sélectionné par Marbnb pour offrir une expérience confortable, pratique et authentique au Maroc."}
               </p>
             </div>
 
             <div className="mt-6 grid gap-4 md:grid-cols-3">
-              <div className="rounded-[2rem] bg-[#fff8ec] p-5 shadow-sm ring-1 ring-[#e5d3b3]"><p className="text-sm text-[#7a6446]">Voyageurs</p><p className="mt-1 text-2xl font-black">{maxVoyageurs}</p></div>
-              <div className="rounded-[2rem] bg-[#fff8ec] p-5 shadow-sm ring-1 ring-[#e5d3b3]"><p className="text-sm text-[#7a6446]">Chambres</p><p className="mt-1 text-2xl font-black">{logement.chambres || 1}</p></div>
-              <div className="rounded-[2rem] bg-[#fff8ec] p-5 shadow-sm ring-1 ring-[#e5d3b3]"><p className="text-sm text-[#7a6446]">Ville</p><p className="mt-1 text-2xl font-black">{logement.ville}</p></div>
+              <div className="marbnb-card-premium rounded-[2rem] bg-[#fff8ec] p-5 shadow-sm ring-1 ring-[#e5d3b3]"><p className="text-sm text-[#7a6446]">Voyageurs</p><p className="mt-1 text-2xl font-black">{maxVoyageurs}</p></div>
+              <div className="marbnb-card-premium rounded-[2rem] bg-[#fff8ec] p-5 shadow-sm ring-1 ring-[#e5d3b3]"><p className="text-sm text-[#7a6446]">Chambres</p><p className="mt-1 text-2xl font-black">{logement.chambres || 1}</p></div>
+              <div className="marbnb-card-premium rounded-[2rem] bg-[#fff8ec] p-5 shadow-sm ring-1 ring-[#e5d3b3]"><p className="text-sm text-[#7a6446]">Ville</p><p className="mt-1 text-2xl font-black">{logement.ville}</p></div>
             </div>
 
             <div className="mt-6 rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3]">
-              <h2 className="text-2xl font-black">Équipements populaires</h2>
+              <h2 className="text-2xl font-black">Confort & art de vivre</h2>
               <div className="mt-5 grid gap-3 md:grid-cols-2">
-                {["Wi‑Fi", "Climatisation", "Cuisine équipée", "Sécurité", "Arrivée flexible", "Support Marbnb"].map((item) => (
+                {["Wi‑Fi", "Climatisation", "Cuisine équipée", "Sécurité", "Accueil flexible", "Conciergerie Marbnb"].map((item) => (
                   <div key={item} className="rounded-2xl border border-[#ead9ba] bg-white p-4 font-bold">✓ {item}</div>
                 ))}
               </div>
@@ -289,7 +289,7 @@ function DetailLogementContent() {
             </div>
           </div>
 
-          <aside className="h-fit rounded-[2rem] bg-[#fff8ec] p-5 shadow-xl ring-1 ring-[#e5d3b3] lg:sticky lg:top-6">
+          <aside className="marbnb-card-premium h-fit rounded-[2rem] bg-[#fff8ec] p-5 shadow-xl ring-1 ring-[#e5d3b3] lg:sticky lg:top-6">
             <div className="flex items-end justify-between gap-3">
               <div>
                 <p className="text-sm text-[#7a6446]">Prix par nuit</p>

@@ -124,8 +124,8 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        <section className="mt-5 rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3]">
-          <p className="font-black text-[#c1121f]">Admin Marbnb</p>
+        <section className="marbnb-card-premium mt-5 rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3]">
+          <p className="font-black text-[#c1121f]">Admin Marbnb Premium</p>
           <h1 className="mt-2 text-4xl font-black">Tableau de bord</h1>
           <p className="mt-3 text-[#7a6446]">Vue rapide des demandes, logements et réservations.</p>
 
@@ -135,12 +135,12 @@ export default function AdminDashboardPage() {
           {!loading && (
             <>
               <div className="mt-6 grid gap-4 md:grid-cols-3 lg:grid-cols-6">
-                <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Demandes en attente</p><p className="mt-2 text-3xl font-black">{stats.demandesEnAttente}</p></div>
-                <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Logements actifs</p><p className="mt-2 text-3xl font-black">{stats.logementsActifs}</p></div>
-                <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Logements masqués</p><p className="mt-2 text-3xl font-black">{stats.logementsMasques}</p></div>
-                <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Réservations</p><p className="mt-2 text-3xl font-black">{stats.totalReservations}</p></div>
-                <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">CA estimé</p><p className="mt-2 text-2xl font-black">{formatMad(stats.caMad)}</p></div>
-                <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Arrivées aujourd’hui</p><p className="mt-2 text-3xl font-black">{stats.arriveesAujourdhui}</p></div>
+                <div className="marbnb-card-premium rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Demandes en attente</p><p className="mt-2 text-3xl font-black">{stats.demandesEnAttente}</p></div>
+                <div className="marbnb-card-premium rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Logements actifs</p><p className="mt-2 text-3xl font-black">{stats.logementsActifs}</p></div>
+                <div className="marbnb-card-premium rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Logements masqués</p><p className="mt-2 text-3xl font-black">{stats.logementsMasques}</p></div>
+                <div className="marbnb-card-premium rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Réservations</p><p className="mt-2 text-3xl font-black">{stats.totalReservations}</p></div>
+                <div className="marbnb-card-premium rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">CA estimé</p><p className="mt-2 text-2xl font-black">{formatMad(stats.caMad)}</p></div>
+                <div className="marbnb-card-premium rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Arrivées aujourd’hui</p><p className="mt-2 text-3xl font-black">{stats.arriveesAujourdhui}</p></div>
               </div>
 
               <div className="mt-8 rounded-[2rem] bg-white p-5 ring-1 ring-[#e5d3b3]">

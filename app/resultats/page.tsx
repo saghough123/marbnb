@@ -220,14 +220,14 @@ function ResultatsContent() {
 
         <div className="relative mx-auto max-w-7xl px-4 pb-10 pt-10 md:pb-16 md:pt-16">
           <div className="max-w-3xl">
-            <p className="inline-flex rounded-full border border-white/30 bg-white/20 px-4 py-2 text-sm font-bold text-white shadow backdrop-blur">
-              Marbnb · Séjours au Maroc
+            <p className="marbnb-premium-signature rounded-full px-4 py-2 text-sm font-bold shadow backdrop-blur">
+              Marbnb · Luxury Moroccan Stays
             </p>
             <h1 className="mt-5 text-4xl font-black tracking-tight text-white drop-shadow md:text-6xl">
               Trouvez le logement idéal pour votre expérience au Maroc.
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-7 text-white/90 md:text-lg">
-              Villas, riads, studios et appartements vérifiés, avec paiement flexible et réservation simple.
+              Riads lumineux, villas privées, studios design et appartements vérifiés dans une atmosphère marocaine premium.
             </p>
           </div>
 
@@ -297,8 +297,8 @@ function ResultatsContent() {
               <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-end">
                 <div>
                   <p className="font-black text-[#c1121f]">{resultats.length} logement(s) trouvé(s)</p>
-                  <h2 className="text-3xl font-black md:text-4xl">Meilleures options</h2>
-                  <p className="mt-1 text-sm text-[#7a6446]">Sélection personnalisée selon vos dates, voyageurs et budget.</p>
+                  <h2 className="text-3xl font-black md:text-4xl">Sélection premium</h2>
+                  <p className="mt-1 text-sm text-[#7a6446]">Des logements choisis pour leur confort, leur style et leur emplacement.</p>
                 </div>
               </div>
 
@@ -313,7 +313,7 @@ function ResultatsContent() {
                   const miniatures = photosBase.slice(0, 4);
 
                   return (
-                    <article key={l.id} className="group overflow-hidden rounded-[2rem] bg-[#fff8ec] shadow-sm ring-1 ring-[#e5d3b3] transition duration-300 hover:-translate-y-1 hover:shadow-2xl">
+                    <article key={l.id} className="marbnb-card-premium group overflow-hidden rounded-[2rem] bg-[#fff8ec] shadow-sm ring-1 ring-[#e5d3b3] transition duration-300 hover:-translate-y-1 hover:shadow-2xl">
                       <div className="relative h-64 overflow-hidden">
                         <img src={imagePrincipale} alt={l.titre} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/55 to-transparent" />

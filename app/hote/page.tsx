@@ -200,16 +200,16 @@ export default function HotePage() {
           <div className="relative bg-[#1e1b18] px-6 py-10 text-white md:px-8">
             <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "url(/marbnb-hero-mix.png)", backgroundSize: "cover", backgroundPosition: "center" }} />
             <div className="relative max-w-3xl">
-              <p className="inline-flex rounded-full border border-white/30 bg-white/15 px-4 py-2 text-sm font-black backdrop-blur">Devenir hôte Marbnb</p>
-              <h1 className="mt-5 text-4xl font-black md:text-6xl">Publier mon logement</h1>
+              <p className="inline-flex rounded-full border border-white/30 bg-white/15 px-4 py-2 text-sm font-black backdrop-blur">Devenir hôte premium Marbnb</p>
+              <h1 className="mt-5 text-4xl font-black md:text-6xl">Proposer mon adresse d’exception</h1>
               <p className="mt-4 max-w-2xl leading-7 text-white/85">
-                Ajoute les informations essentielles, sélectionne les équipements et envoie tes photos. La demande sera ensuite vérifiée dans l’espace Admin.
+                Présente ton logement avec ses équipements, ses photos et son charme. Marbnb vérifie ensuite la demande avant publication.
               </p>
             </div>
           </div>
 
           <form onSubmit={envoyerDemande} className="grid gap-5 p-6 md:grid-cols-2 md:p-8">
-            <div className="rounded-[2rem] bg-white p-5 ring-1 ring-[#ead9ba] md:col-span-2">
+            <div className="marbnb-card-premium rounded-[2rem] bg-white p-5 ring-1 ring-[#ead9ba] md:col-span-2">
               <h2 className="text-xl font-black">Coordonnées propriétaire</h2>
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 <label>
@@ -223,7 +223,7 @@ export default function HotePage() {
               </div>
             </div>
 
-            <div className="rounded-[2rem] bg-white p-5 ring-1 ring-[#ead9ba] md:col-span-2">
+            <div className="marbnb-card-premium rounded-[2rem] bg-white p-5 ring-1 ring-[#ead9ba] md:col-span-2">
               <h2 className="text-xl font-black">Localisation du logement</h2>
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 <label>
@@ -249,7 +249,7 @@ export default function HotePage() {
               </div>
             </div>
 
-            <div className="rounded-[2rem] bg-white p-5 ring-1 ring-[#ead9ba] md:col-span-2">
+            <div className="marbnb-card-premium rounded-[2rem] bg-white p-5 ring-1 ring-[#ead9ba] md:col-span-2">
               <h2 className="text-xl font-black">Informations du logement</h2>
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 <label>
@@ -279,7 +279,7 @@ export default function HotePage() {
               </div>
             </div>
 
-            <div className="rounded-[2rem] bg-white p-5 ring-1 ring-[#ead9ba] md:col-span-2">
+            <div className="marbnb-card-premium rounded-[2rem] bg-white p-5 ring-1 ring-[#ead9ba] md:col-span-2">
               <h2 className="text-xl font-black">Équipements du logement</h2>
               <p className="mt-1 text-sm text-[#7a6446]">Sélectionne les équipements disponibles pour mieux valoriser ton logement.</p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2 md:grid-cols-4">
@@ -294,7 +294,7 @@ export default function HotePage() {
               </div>
             </div>
 
-            <div className="rounded-[2rem] bg-white p-5 ring-1 ring-[#ead9ba] md:col-span-2">
+            <div className="marbnb-card-premium rounded-[2rem] bg-white p-5 ring-1 ring-[#ead9ba] md:col-span-2">
               <h2 className="text-xl font-black">Photos et description</h2>
               <div className="mt-4 grid gap-4">
                 <label>
@@ -322,7 +322,7 @@ export default function HotePage() {
             </div>
 
             <button disabled={loading} className="rounded-2xl bg-[#3F7D3B] px-6 py-4 font-black text-white shadow-lg transition hover:bg-[#2f6f34] disabled:opacity-60 md:col-span-2">
-              {loading ? "Envoi en cours..." : "Envoyer ma demande"}
+              {loading ? "Envoi en cours..." : "Envoyer pour validation premium"}
             </button>
           </form>
 

@@ -181,8 +181,8 @@ export default function AdminDemandesPage() {
           </div>
         </div>
 
-        <section className="mt-5 rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3]">
-          <p className="font-black text-[#c1121f]">Admin Marbnb</p>
+        <section className="marbnb-card-premium mt-5 rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3]">
+          <p className="font-black text-[#c1121f]">Admin Marbnb Premium</p>
           <h1 className="mt-2 text-4xl font-black">Demandes hôtes</h1>
           <p className="mt-3 text-[#7a6446]">Accepter une demande publie automatiquement le logement dans la table logements.</p>
 
@@ -192,10 +192,10 @@ export default function AdminDemandesPage() {
           {!loading && (
             <>
               <div className="mt-6 grid gap-4 md:grid-cols-4">
-                <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Total</p><p className="mt-2 text-3xl font-black">{stats.total}</p></div>
-                <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">En attente</p><p className="mt-2 text-3xl font-black">{stats.attente}</p></div>
-                <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Acceptées</p><p className="mt-2 text-3xl font-black">{stats.acceptees}</p></div>
-                <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Refusées</p><p className="mt-2 text-3xl font-black">{stats.refusees}</p></div>
+                <div className="marbnb-card-premium rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Total</p><p className="mt-2 text-3xl font-black">{stats.total}</p></div>
+                <div className="marbnb-card-premium rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">En attente</p><p className="mt-2 text-3xl font-black">{stats.attente}</p></div>
+                <div className="marbnb-card-premium rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Acceptées</p><p className="mt-2 text-3xl font-black">{stats.acceptees}</p></div>
+                <div className="marbnb-card-premium rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]"><p className="text-xs font-black text-[#7a3d14]">Refusées</p><p className="mt-2 text-3xl font-black">{stats.refusees}</p></div>
               </div>
 
               <div className="mt-5 rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]">
