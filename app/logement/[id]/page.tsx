@@ -8,7 +8,7 @@ type Devise = "MAD" | "EUR" | "USD" | "GBP" | "CAD" | "AED";
 type Paiement = "espece" | "ligne";
 
 type Logement = {
-  id: number;
+  id: number | string;
   titre: string;
   ville: string;
   quartier: string | null;
@@ -88,7 +88,7 @@ function formatPrix(mad: number, devise: Devise) {
 function DetailLogementContent() {
   const params = useParams<{ id: string }>();
   const searchParams = useSearchParams();
-  const logementId = Number(params.id);
+  const logementId = params.id;
 
   const [logement, setLogement] = useState<Logement | null>(null);
   const [loading, setLoading] = useState(true);
@@ -133,7 +133,7 @@ function DetailLogementContent() {
       setLoading(false);
     }
 
-    if (Number.isFinite(logementId)) chargerLogement();
+    if (logementId && String(logementId).trim()) chargerLogement();
     else {
       setErreur("Identifiant logement invalide.");
       setLoading(false);
