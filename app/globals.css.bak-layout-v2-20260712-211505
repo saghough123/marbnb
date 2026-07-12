@@ -303,10 +303,76 @@ a[class*="bg-[#3F7D3B]"]:hover {
 
 @import "./marbnb-ui-full-fix-v3.css";
 
-/* MARBNB_HERO_COMPACT_V3_START */
-/* Correction Marbnb V3 : grandes images d'accueil et résultats plus compactes. */
+/* MARBNB_LAYOUT_FIX_START */
+/*
+  Correction Marbnb : remonter le contenu Accueil + Explorer.
+  Cette correction est volontairement faite en CSS pour éviter de casser les fichiers TSX.
+*/
 
-/* Navbar toujours visible */
+/* 1) Limiter la hauteur des grands visuels en haut des pages */
+body:has(img[src="/marbnb-hero-mix.png"]) main,
+body:has(img[src="/marbnb-hero-mix.png"]) section {
+  scroll-margin-top: 96px;
+}
+
+/* Accueil : premier grand hero */
+body:has(a[href="/admin-dashboard"]) section:has(img[src="/marbnb-hero-mix.png"]),
+body:has(a[href="/resultats"]) section:has(img[src="/marbnb-hero-mix.png"]),
+section:has(img[src="/marbnb-hero-mix.png"]):first-of-type {
+  min-height: 480px !important;
+  max-height: 560px !important;
+}
+
+section:has(img[src="/marbnb-hero-mix.png"]):first-of-type > div,
+section:has(img[src="/marbnb-hero-mix.png"]):first-of-type > div.relative,
+section:has(img[src="/marbnb-hero-mix.png"]):first-of-type > div[class*="max-w-7xl"] {
+  min-height: 480px !important;
+  padding-top: 40px !important;
+  padding-bottom: 32px !important;
+}
+
+section:has(img[src="/marbnb-hero-mix.png"]):first-of-type img[src="/marbnb-hero-mix.png"] {
+  height: 100% !important;
+  max-height: 560px !important;
+  object-fit: cover !important;
+  object-position: center 42% !important;
+}
+
+/* 2) Explorer / résultats : hero plus compact */
+body:has(input[placeholder="Ville, quartier ou logement"]) section:has(img[src="/marbnb-hero-mix.png"]),
+body:has(input[placeholder="Ville ou quartier"]) section:has(img[src="/marbnb-hero-mix.png"]) {
+  min-height: 420px !important;
+  max-height: 520px !important;
+}
+
+body:has(input[placeholder="Ville, quartier ou logement"]) section:has(img[src="/marbnb-hero-mix.png"]) > div[class*="max-w-7xl"],
+body:has(input[placeholder="Ville ou quartier"]) section:has(img[src="/marbnb-hero-mix.png"]) > div[class*="max-w-7xl"] {
+  min-height: auto !important;
+  padding-top: 32px !important;
+  padding-bottom: 24px !important;
+}
+
+/* 3) Remonter les cartes/blocs qui se trouvent juste après la grande image */
+section:has(img[src="/marbnb-hero-mix.png"]) + main,
+section:has(img[src="/marbnb-hero-mix.png"]) + section,
+section:has(img[src="/marbnb-hero-secondary.png"]) + section {
+  margin-top: 0 !important;
+  padding-top: 24px !important;
+}
+
+/* 4) Réduire l'effet voile blanc trop grand si présent */
+.marbnb-clean-hero,
+.marbnb-premium-hero,
+.marbnb-home-readable {
+  min-height: 480px !important;
+  max-height: 560px !important;
+}
+
+.marbnb-clean-hero-overlay {
+  opacity: 0.45 !important;
+}
+
+/* 5) Navbar toujours visible et au-dessus des images */
 header,
 nav,
 .marbnb-navbar {
@@ -315,101 +381,24 @@ nav,
   z-index: 9999 !important;
 }
 
-/* Cible toutes les sections qui utilisent la grande image Marbnb. */
-section:has(img[src="/marbnb-hero-mix.png"]) {
-  position: relative !important;
-  overflow: hidden !important;
-}
-
-/* Si l'image est en flux normal, elle ne doit plus remplir tout l'écran. */
-section:has(img[src="/marbnb-hero-mix.png"]) img[src="/marbnb-hero-mix.png"] {
-  max-height: 460px !important;
-  object-fit: cover !important;
-  object-position: center 45% !important;
-}
-
-/* Résultats / Explorer : la section de recherche doit tenir dans le haut de page. */
-body:has(input[placeholder="Ville, quartier ou logement"]) section:has(img[src="/marbnb-hero-mix.png"]),
-body:has(input[placeholder="Ville ou quartier"]) section:has(img[src="/marbnb-hero-mix.png"]) {
-  min-height: 430px !important;
-  max-height: none !important;
-}
-
-body:has(input[placeholder="Ville, quartier ou logement"]) section:has(img[src="/marbnb-hero-mix.png"]) > div[class*="max-w-7xl"],
-body:has(input[placeholder="Ville ou quartier"]) section:has(img[src="/marbnb-hero-mix.png"]) > div[class*="max-w-7xl"] {
-  min-height: auto !important;
-  padding-top: 28px !important;
-  padding-bottom: 28px !important;
-}
-
-body:has(input[placeholder="Ville, quartier ou logement"]) section:has(img[src="/marbnb-hero-mix.png"]) h1,
-body:has(input[placeholder="Ville ou quartier"]) section:has(img[src="/marbnb-hero-mix.png"]) h1 {
-  font-size: clamp(32px, 4vw, 56px) !important;
-  line-height: 1.08 !important;
-  margin-top: 14px !important;
-}
-
-body:has(input[placeholder="Ville, quartier ou logement"]) section:has(img[src="/marbnb-hero-mix.png"]) div[class*="mt-8"],
-body:has(input[placeholder="Ville ou quartier"]) section:has(img[src="/marbnb-hero-mix.png"]) div[class*="mt-8"] {
-  margin-top: 18px !important;
-}
-
-/* Accueil : première grande section plus courte, mais boutons visibles. */
-section:has(img[src="/marbnb-hero-mix.png"]):first-of-type {
-  min-height: 560px !important;
-}
-
-section:has(img[src="/marbnb-hero-mix.png"]):first-of-type > div[class*="max-w-7xl"],
-section:has(img[src="/marbnb-hero-mix.png"]):first-of-type > div[class*="z-30"] {
-  min-height: 560px !important;
-  padding-top: 42px !important;
-  padding-bottom: 42px !important;
-}
-
-section:has(img[src="/marbnb-hero-mix.png"]):first-of-type h1,
-section:has(img[src="/marbnb-hero-mix.png"]):first-of-type h2 {
-  font-size: clamp(42px, 5vw, 72px) !important;
-  line-height: 1.05 !important;
-}
-
-/* Deuxième section de l'accueil : moins d'espace avant les infos. */
-main.marbnb-home-soft-gradient > section:first-child > div[class*="max-w-7xl"] {
-  padding-top: 38px !important;
-  padding-bottom: 38px !important;
-}
-
-main.marbnb-home-soft-gradient > section:first-child h2 {
-  font-size: clamp(38px, 5vw, 68px) !important;
-  line-height: 1.05 !important;
-}
-
-main.marbnb-home-soft-gradient > section:first-child div[class*="mt-10"] {
-  margin-top: 22px !important;
-}
-
-/* Important : le contenu après le hero ne doit pas être poussé trop bas. */
-section:has(img[src="/marbnb-hero-mix.png"]) + main,
-section:has(img[src="/marbnb-hero-mix.png"]) + section {
-  padding-top: 22px !important;
-  margin-top: 0 !important;
-}
-
-/* Mobile : compacte davantage. */
+/* 6) Mobile : encore plus compact */
 @media (max-width: 768px) {
   section:has(img[src="/marbnb-hero-mix.png"]):first-of-type {
-    min-height: 440px !important;
+    min-height: 380px !important;
+    max-height: 460px !important;
   }
 
-  section:has(img[src="/marbnb-hero-mix.png"]):first-of-type > div[class*="max-w-7xl"],
-  section:has(img[src="/marbnb-hero-mix.png"]):first-of-type > div[class*="z-30"] {
-    min-height: 440px !important;
+  section:has(img[src="/marbnb-hero-mix.png"]):first-of-type > div[class*="max-w-7xl"] {
+    min-height: 380px !important;
     padding-top: 24px !important;
-    padding-bottom: 24px !important;
+    padding-bottom: 20px !important;
   }
 
-  section:has(img[src="/marbnb-hero-mix.png"]) img[src="/marbnb-hero-mix.png"] {
-    max-height: 420px !important;
+  body:has(input[placeholder="Ville, quartier ou logement"]) section:has(img[src="/marbnb-hero-mix.png"]),
+  body:has(input[placeholder="Ville ou quartier"]) section:has(img[src="/marbnb-hero-mix.png"]) {
+    min-height: 360px !important;
+    max-height: 440px !important;
   }
 }
-/* MARBNB_HERO_COMPACT_V3_END */
+/* MARBNB_LAYOUT_FIX_END */
 
