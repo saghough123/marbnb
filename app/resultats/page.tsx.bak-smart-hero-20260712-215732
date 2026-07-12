@@ -1,0 +1,424 @@
+"use client";
+
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
+
+type Devise = "MAD" | "EUR" | "USD" | "GBP" | "CAD" | "AED";
+type Paiement = "espece" | "ligne";
+
+type Logement = {
+  id: number;
+  titre: string;
+  ville: string;
+  quartier: string | null;
+  type_logement: string | null;
+  prix: number | null;
+  chambres: number | null;
+  voyageurs: number | null;
+  description: string | null;
+  image_url: string | null;
+  photos: string | null;
+  statut: string | null;
+};
+
+const fallbackImages = [
+  "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
+];
+
+function getLogementFallbackImage(index: number) {
+  return fallbackImages[index % fallbackImages.length];
+}
+
+function parsePhotos(value: string | null | undefined) {
+  if (!value) return [] as string[];
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) return parsed.filter(Boolean).map(String);
+    return parsed ? [String(parsed)] : [];
+  } catch {
+    return value ? [value] : [];
+  }
+}
+
+function todayISO() {
+  const d = new Date();
+  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+}
+
+function addDaysISO(dateISO: string, days: number) {
+  const base = dateISO && dateISO.trim() ? dateISO : todayISO();
+  const d = new Date(base);
+  if (Number.isNaN(d.getTime())) return todayISO();
+  d.setDate(d.getDate() + days);
+  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+}
+
+function nuitsEntre(a: string, d: string) {
+  const diff = Math.round((new Date(d).getTime() - new Date(a).getTime()) / 86400000);
+  return diff > 0 ? diff : 1;
+}
+
+const tauxDevise: Record<Devise, number> = {
+  MAD: 1,
+  EUR: 0.092,
+  USD: 0.1,
+  GBP: 0.078,
+  CAD: 0.137,
+  AED: 0.367,
+};
+
+const symbole: Record<Devise, string> = {
+  MAD: "MAD",
+  EUR: "€",
+  USD: "$",
+  GBP: "£",
+  CAD: "C$",
+  AED: "AED",
+};
+
+const categories = ["Maisons", "Appartements", "Bord de mer", "Piscine", "Riads", "Premium"];
+
+function formatPrix(mad: number, devise: Devise) {
+  const v = Math.round(mad * tauxDevise[devise]);
+  return devise === "MAD" ? `${v.toLocaleString("fr-FR")} MAD` : `${symbole[devise]} ${v.toLocaleString("fr-FR")}`;
+}
+
+function ResultatsContent() {
+  const params = useSearchParams();
+  const [destination, setDestination] = useState(params.get("destination") || "");
+  const [arrivee, setArrivee] = useState(params.get("arrivee") || todayISO());
+  const [depart, setDepart] = useState(params.get("depart") || addDaysISO(params.get("arrivee") || todayISO(), 1));
+  const [voyageurs, setVoyageurs] = useState(Math.max(1, Number(params.get("voyageurs") || 1)));
+  const [villeRapide, setVilleRapide] = useState("Toutes");
+  const [type, setType] = useState("Tous");
+  const [prixMax, setPrixMax] = useState(2500);
+  const [paiement, setPaiement] = useState<Paiement>("ligne");
+  const [devise, setDevise] = useState<Devise>("MAD");
+  const [message, setMessage] = useState("");
+  const [clientNom, setClientNom] = useState("");
+  const [clientTelephone, setClientTelephone] = useState("");
+  const [clientEmail, setClientEmail] = useState("");
+  const [clientMessage, setClientMessage] = useState("");
+  const [heureArrivee, setHeureArrivee] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [erreur, setErreur] = useState("");
+  const [logements, setLogements] = useState<Logement[]>([]);
+
+  useEffect(() => {
+    const start = new Date(arrivee).getTime();
+    const end = new Date(depart).getTime();
+    if (!Number.isNaN(start) && (Number.isNaN(end) || end <= start)) {
+      setDepart(addDaysISO(arrivee, 1));
+    }
+  }, [arrivee, depart]);
+
+  useEffect(() => {
+    async function chargerLogements() {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("logements")
+        .select("id,titre,ville,quartier,type_logement,prix,chambres,voyageurs,description,image_url,photos,statut")
+        .eq("statut", "Actif")
+        .order("id", { ascending: true });
+
+      if (error) {
+        setErreur(error.message);
+        setLogements([]);
+      } else {
+        setErreur("");
+        setLogements(data || []);
+      }
+      setLoading(false);
+    }
+    chargerLogements();
+  }, []);
+
+  const nuits = nuitsEntre(arrivee, depart);
+
+  const resultats = useMemo(() => {
+    return logements.filter((l) => {
+      const texte = `${l.ville || ""} ${l.quartier || ""} ${l.titre || ""}`.toLowerCase();
+      return (
+        texte.includes(destination.toLowerCase()) &&
+        (villeRapide === "Toutes" || l.ville === villeRapide) &&
+        (type === "Tous" || l.type_logement === type) &&
+        Number(l.voyageurs || 1) >= voyageurs &&
+        Number(l.prix || 0) <= prixMax
+      );
+    });
+  }, [logements, destination, villeRapide, type, voyageurs, prixMax]);
+
+  function relancerRecherche() {
+    window.location.href =
+      "/resultats?destination=" +
+      encodeURIComponent(destination) +
+      "&arrivee=" +
+      encodeURIComponent(arrivee) +
+      "&depart=" +
+      encodeURIComponent(depart) +
+      "&voyageurs=" +
+      voyageurs;
+  }
+
+  async function reserver(logement: Logement, total: number) {
+    setMessage("");
+    const { error } = await supabase.from("reservations").insert({
+      logement_id: logement.id,
+      logement_titre: logement.titre,
+      ville: logement.ville,
+      arrivee,
+      depart,
+      voyageurs,
+      paiement,
+      devise,
+      total,
+      statut: paiement === "ligne" ? "Payée en ligne" : "Pré-confirmée",
+      client_nom: clientNom.trim(),
+      client_telephone: clientTelephone.trim(),
+      client_email: clientEmail.trim(),
+      client_message: clientMessage.trim(),
+      heure_arrivee: heureArrivee,
+    });
+
+    if (error) {
+      setMessage(`Erreur réservation : ${error.message}`);
+      return;
+    }
+
+    const confirmParams = new URLSearchParams({
+      titre: logement.titre || "Logement Marbnb",
+      ville: logement.ville || "Maroc",
+      arrivee,
+      depart,
+      voyageurs: String(voyageurs),
+      total: String(total),
+      paiement,
+      devise: paiement === "ligne" ? devise : "MAD",
+      statut: paiement === "ligne" ? "Payée en ligne" : "Pré-confirmée",
+    });
+    window.location.href = "/reservation-confirmation?" + confirmParams.toString();
+  }
+
+  return (
+    <div className="min-h-screen bg-[#f7efe2] text-[#1e1b18]">
+      <section className="marbnb-results-readable marbnb-clean-hero relative overflow-hidden border-b border-[#ead9ba]">
+        <div className="absolute inset-0">
+          <img src="/marbnb-hero-mix.png" alt="Décor marocain" className="h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-white/10 to-[#fffdf8]" />
+        </div>
+
+        <div className="relative mx-auto max-w-7xl px-4 pb-6 pt-8 md:pb-8 md:pt-10">
+          <div className="max-w-3xl">
+            <p className="marbnb-premium-signature rounded-full px-4 py-2 text-sm font-bold shadow backdrop-blur">
+              Marbnb · Luxury Moroccan Stays
+            </p>
+            <h1 className="mt-5 text-4xl font-black tracking-tight text-[#28231d]  md:text-6xl">
+              Trouvez votre séjour idéal au Maroc.
+            </h1>
+            <p className="marbnb-hero-readable-text mt-4 max-w-2xl text-base leading-7 text-[#5d513e] md:text-lg">
+              Riads lumineux, villas privées, studios design et appartements vérifiés dans une atmosphère marocaine premium.
+            </p>
+          </div>
+
+          <div className="mt-5 rounded-[2rem] border border-white/30 bg-[#fff8ec]/95 p-4 shadow-2xl backdrop-blur">
+            <div className="grid gap-3 md:grid-cols-[1.4fr_1fr_1fr_0.8fr_auto]">
+              <label className="block">
+                <span className="text-xs font-black text-[#7a3d14]">Destination</span>
+                <input value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="Ville, quartier ou logement" className="mt-1 w-full rounded-2xl border border-[#e5d3b3] bg-white px-4 py-3 outline-none focus:border-[#3F7D3B]" />
+              </label>
+              <label className="block">
+                <span className="text-xs font-black text-[#7a3d14]">Arrivée</span>
+                <input type="date" value={arrivee} onChange={(e) => setArrivee(e.target.value)} className="mt-1 w-full rounded-2xl border border-[#e5d3b3] bg-white px-4 py-3 outline-none focus:border-[#3F7D3B]" />
+              </label>
+              <label className="block">
+                <span className="text-xs font-black text-[#7a3d14]">Départ</span>
+                <input type="date" value={depart} onChange={(e) => setDepart(e.target.value)} className="mt-1 w-full rounded-2xl border border-[#e5d3b3] bg-white px-4 py-3 outline-none focus:border-[#3F7D3B]" />
+              </label>
+              <label className="block">
+                <span className="text-xs font-black text-[#7a3d14]">Voyageurs</span>
+                <input type="number" min={1} value={voyageurs} onChange={(e) => setVoyageurs(Math.max(1, Number(e.target.value) || 1))} className="mt-1 w-full rounded-2xl border border-[#e5d3b3] bg-white px-4 py-3 outline-none focus:border-[#3F7D3B]" />
+              </label>
+              <button onClick={relancerRecherche} className="rounded-2xl bg-[#c1121f] px-7 py-3 font-black text-[#28231d] shadow-lg transition hover:bg-[#a50f1a] md:self-end">
+                Rechercher
+              </button>
+            </div>
+
+            <div className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_1.4fr]">
+              <select value={villeRapide} onChange={(e) => setVilleRapide(e.target.value)} className="rounded-2xl border border-[#e5d3b3] bg-white px-4 py-3 outline-none">
+                <option>Toutes</option>
+                <option>Casablanca</option>
+                <option>Marrakech</option>
+                <option>Fès</option>
+                <option>Tanger</option>
+                <option>Agadir</option>
+              </select>
+              <select value={type} onChange={(e) => setType(e.target.value)} className="rounded-2xl border border-[#e5d3b3] bg-white px-4 py-3 outline-none">
+                <option>Tous</option>
+                <option>Appartement</option>
+                <option>Studio</option>
+                <option>Villa</option>
+                <option>Riad</option>
+              </select>
+              <label className="rounded-2xl border border-[#e5d3b3] bg-white px-4 py-3">
+                <div className="mb-2 flex justify-between text-xs font-black text-[#7a3d14]"><span>Budget max</span><span>{prixMax} MAD / nuit</span></div>
+                <input type="range" min={300} max={2500} step={50} value={prixMax} onChange={(e) => setPrixMax(Number(e.target.value))} className="w-full accent-[#3F7D3B]" />
+              </label>
+            </div>
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-3">
+            {categories.map((c) => (
+              <span key={c} className="rounded-full border border-[#e5d3b3] bg-[#fff8ec] px-5 py-3 text-sm font-black shadow-sm">
+                {c}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <main className="mx-auto max-w-7xl px-4 py-10">
+        {loading && <p className="rounded-[2rem] bg-[#fff8ec] p-6 text-center font-black ring-1 ring-[#e5d3b3]">Chargement des logements...</p>}
+        {erreur && <p className="rounded-[2rem] bg-red-50 p-6 text-center font-black text-red-700 ring-1 ring-red-100">Erreur technique : {erreur}</p>}
+
+        {!loading && !erreur && (
+          <section className="grid gap-8 lg:grid-cols-[1fr_360px]">
+            <div>
+              <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+                <div>
+                  <p className="font-black text-[#c1121f]">{resultats.length} logement(s) trouvé(s)</p>
+                  <h2 className="text-3xl font-black md:text-4xl">Sélection premium</h2>
+                  <p className="mt-1 text-sm text-[#7a6446]">Des logements choisis pour leur confort, leur style et leur emplacement.</p>
+                </div>
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                {resultats.map((l, index) => {
+                  const prixNuit = Number(l.prix || 0);
+                  const prixSejour = prixNuit * nuits;
+                  const frais = paiement === "espece" ? Math.round(prixSejour * 0.05) : 0;
+                  const total = prixSejour + frais;
+                  const photosBase = parsePhotos(l.photos).filter(Boolean);
+                  const imagePrincipale = photosBase[0] || l.image_url || getLogementFallbackImage(index);
+                  const miniatures = photosBase.slice(0, 4);
+
+                  return (
+                    <article key={l.id} className="marbnb-card-premium group overflow-hidden rounded-[2rem] bg-[#fff8ec] shadow-sm ring-1 ring-[#e5d3b3] transition duration-300 hover:-translate-y-1 hover:shadow-2xl">
+                      <div className="relative h-64 overflow-hidden">
+                        <img src={imagePrincipale} alt={l.titre} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/55 to-transparent" />
+                        <span className="absolute left-3 top-3 rounded-full bg-[#fff8ec]/95 px-3 py-1 text-xs font-black text-[#7a3d14] shadow">
+                          {l.type_logement || "Logement"}
+                        </span>
+                        <span className="absolute right-3 top-3 rounded-full bg-white/95 px-3 py-1 text-xs font-black text-[#3F7D3B] shadow">
+                          ⭐ 4.8
+                        </span>
+                        {miniatures.length > 0 && (
+                          <div className="absolute bottom-3 left-3 right-3 grid grid-cols-4 gap-2">
+                            {miniatures.map((photo) => (
+                              <img key={photo} src={photo} alt="Photo logement" className="h-12 w-full rounded-xl object-cover ring-2 ring-white/80" />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="p-5">
+                        <div className="min-h-[72px]">
+                          <h3 className="line-clamp-2 text-lg font-black leading-tight">{l.titre}</h3>
+                          <p className="mt-1 text-sm text-[#7a6446]">{l.quartier || "Centre"}, {l.ville}</p>
+                          <p className="mt-2 text-sm text-[#7a6446]">{l.chambres || 1} chambre(s) · max {l.voyageurs || 1} voyageurs</p>
+                        </div>
+
+                        <div className="mt-4 rounded-2xl bg-white p-4 text-sm ring-1 ring-[#ead9ba]">
+                          <div className="flex justify-between"><span>{prixNuit.toLocaleString("fr-FR")} MAD x {nuits} nuit(s)</span><span>{prixSejour.toLocaleString("fr-FR")} MAD</span></div>
+                          <div className="mt-2 flex justify-between text-[#7a6446]"><span>{paiement === "espece" ? "Frais service 5%" : "Frais paiement en ligne"}</span><span>{paiement === "ligne" ? "0 MAD" : `${frais.toLocaleString("fr-FR")} MAD`}</span></div>
+                          <div className="mt-3 flex justify-between border-t pt-3 text-base font-black"><span>Total</span><span>{formatPrix(total, paiement === "ligne" ? devise : "MAD")}</span></div>
+                        </div>
+
+                        <a href={`/logement/${l.id}?arrivee=${arrivee}&depart=${depart}&voyageurs=${voyageurs}`} className="mt-4 block rounded-2xl bg-[#3F7D3B] py-3 text-center font-black text-[#28231d] shadow transition hover:bg-[#2f6f34]">
+                          Voir détails
+                        </a>
+                      </div>
+                    </article>
+                  );
+                })}
+
+                {resultats.length === 0 && (
+                  <div className="rounded-[2rem] bg-[#fff8ec] p-8 text-center ring-1 ring-[#e5d3b3] md:col-span-2 xl:col-span-3">
+                    <p className="text-xl font-black">Aucun logement trouvé</p>
+                    <p className="mt-2 text-[#7a6446]">Essaie une autre ville, un autre type ou augmente le budget.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <aside className="h-fit rounded-[2rem] bg-[#fff8ec] p-5 shadow-sm ring-1 ring-[#e5d3b3] lg:sticky lg:top-6">
+              <h3 className="text-xl font-black">Paiement</h3>
+              <p className="mt-1 text-sm text-[#7a6446]">Choisissez votre méthode préférée pour préparer votre réservation.</p>
+
+              <button onClick={() => setPaiement("espece")} className={`mt-4 w-full rounded-2xl border p-4 text-left transition ${paiement === "espece" ? "border-[#3F7D3B] bg-[#EAF3E4]" : "bg-white hover:bg-[#f7efe2]"}`}>
+                <b>💵 Paiement sur place</b>
+                <p className="text-sm text-[#7a6446]">Option disponible lors de la confirmation.</p>
+              </button>
+              <button onClick={() => setPaiement("ligne")} className={`mt-3 w-full rounded-2xl border p-4 text-left transition ${paiement === "ligne" ? "border-[#3F7D3B] bg-[#EAF3E4]" : "bg-white hover:bg-[#f7efe2]"}`}>
+                <b>💳 Paiement flexible</b>
+                <p className="text-sm text-[#7a6446]">Réservation finalisée sur la page du logement.</p>
+              </button>
+
+              {paiement === "ligne" && (
+                <select value={devise} onChange={(e) => setDevise(e.target.value as Devise)} className="mt-3 w-full rounded-2xl border bg-white px-4 py-3 outline-none">
+                  <option value="MAD">MAD</option>
+                  <option value="EUR">EUR</option>
+                  <option value="USD">USD</option>
+                  <option value="GBP">GBP</option>
+                  <option value="CAD">CAD</option>
+                  <option value="AED">AED</option>
+                </select>
+              )}
+
+              <div className="mt-5 rounded-2xl bg-white p-4 ring-1 ring-[#e5d3b3]">
+                <h4 className="font-black">Vos informations</h4>
+                <p className="mt-1 text-xs text-[#7a6446]">Ces informations permettent de confirmer votre réservation.</p>
+                <div className="mt-3 grid gap-3">
+                  <input value={clientNom} onChange={(e) => setClientNom(e.target.value)} placeholder="Nom complet *" className="w-full rounded-2xl border bg-white px-4 py-3 text-sm outline-none focus:border-[#3F7D3B]" />
+                  <input value={clientTelephone} onChange={(e) => setClientTelephone(e.target.value)} placeholder="Téléphone *" className="w-full rounded-2xl border bg-white px-4 py-3 text-sm outline-none focus:border-[#3F7D3B]" />
+                  <input value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} placeholder="Email" className="w-full rounded-2xl border bg-white px-4 py-3 text-sm outline-none focus:border-[#3F7D3B]" />
+                  <input value={heureArrivee} onChange={(e) => setHeureArrivee(e.target.value)} placeholder="Heure d’arrivée approximative" className="w-full rounded-2xl border bg-white px-4 py-3 text-sm outline-none focus:border-[#3F7D3B]" />
+                  <textarea value={clientMessage} onChange={(e) => setClientMessage(e.target.value)} placeholder="Message optionnel" rows={3} className="w-full rounded-2xl border bg-white px-4 py-3 text-sm outline-none focus:border-[#3F7D3B]" />
+                </div>
+              </div>
+
+              <div className="mt-5 rounded-2xl bg-[#f4ead7] p-4 text-sm text-[#7a6446]">
+                <b className="text-[#1e1b18]">Critères actifs</b>
+                <p>Destination : {destination || "Toutes"}</p>
+                <p>Dates : {arrivee} → {depart}</p>
+                <p>Voyageurs : {voyageurs}</p>
+                <p>Budget max : {prixMax} MAD</p>
+              </div>
+
+              {message && <p className="mt-4 rounded-2xl bg-[#EAF3E4] p-3 text-sm font-bold text-[#3F7D3B]">{message}</p>}
+            </aside>
+          </section>
+        )}
+      </main>
+    </div>
+  );
+}
+
+export default function ResultatsPage() {
+  return (
+    <Suspense fallback={<div className="p-8">Chargement...</div>}>
+      <ResultatsContent />
+    </Suspense>
+  );
+}
