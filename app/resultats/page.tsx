@@ -309,7 +309,7 @@ function ResultatsContent() {
                   const frais = paiement === "espece" ? Math.round(prixSejour * 0.05) : 0;
                   const total = prixSejour + frais;
                   const photosBase = parsePhotos(l.photos).filter(Boolean);
-                  const imagePrincipale = getLogementFallbackImage(index);
+                  const imagePrincipale = photosBase[0] || l.image_url || getLogementFallbackImage(index);
                   const miniatures = photosBase.slice(0, 4);
 
                   return (

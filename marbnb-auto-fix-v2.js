@@ -1,4 +1,57 @@
-"use client";
+/*
+  Marbnb auto-fix script v2
+  Usage:
+    1) Place this file in the root of your Marbnb project: C:\Users\SAGHOUGH\marbnb
+    2) Run: node marbnb-auto-fix.js
+    3) Run: npm run build
+    4) If OK: git add . && git commit -m "Fix admin demandes, logements, reservations and photos" && git push
+*/
+
+const fs = require("fs");
+const path = require("path");
+
+const root = process.cwd();
+
+function exists(p) {
+  return fs.existsSync(path.join(root, p));
+}
+
+function read(p) {
+  return fs.readFileSync(path.join(root, p), "utf8");
+}
+
+function write(p, content) {
+  const full = path.join(root, p);
+  fs.mkdirSync(path.dirname(full), { recursive: true });
+  fs.writeFileSync(full, content, "utf8");
+  console.log("[OK] écrit : " + p);
+}
+
+function patch(p, callback) {
+  if (!exists(p)) {
+    console.log("[INFO] fichier absent, ignoré : " + p);
+    return;
+  }
+  const before = read(p);
+  const after = callback(before);
+  if (after !== before) write(p, after);
+  else console.log("[OK] déjà corrigé : " + p);
+}
+
+function firstExisting(candidates) {
+  return candidates.find(exists) || candidates[0];
+}
+
+const files = {
+  adminDemandes: firstExisting(["app/admin-demandes/page.tsx", "app/admin demande/page.tsx", "app/admin-demande/page.tsx"]),
+  adminLogements: firstExisting(["app/admin-logements/page.tsx", "app/admin logements/page.tsx"]),
+  adminReservations: firstExisting(["app/admin-reservations/page.tsx", "app/admin reservations/page.tsx"]),
+  resultats: firstExisting(["app/resultats/page.tsx", "app/sesultats/page.tsx"]),
+  compte: firstExisting(["app/compte/page.tsx"]),
+  installation: firstExisting(["app/installation/page.tsx"]),
+};
+
+const adminDemandesPage = String.raw`"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
@@ -275,3 +328,137 @@ export default function AdminDemandesPage() {
     </main>
   );
 }
+`;
+
+// 1) Remplacer l'ancien prototype Admin demandes par une page Supabase propre.
+write(files.adminDemandes, adminDemandesPage);
+
+// 2) Corriger admin logements : fonction manquante, encodage, textes et sécurité.
+patch(files.adminLogements, (s) => {
+  s = s
+    .replaceAll("Modification enregistrÃ©e âœ…", "Modification enregistrée ✅")
+    .replaceAll("Supprimer dÃ©finitivement", "Supprimer définitivement")
+    .replaceAll("Logement supprimÃ© âœ…", "Logement supprimé ✅")
+    .replaceAll("VÃ©rification accÃ¨s admin", "Vérification accès admin")
+    .replaceAll("â† Demandes hÃ´tes", "← Demandes hôtes")
+    .replaceAll("Voir rÃ©sultats", "Voir résultats")
+    .replaceAll("DÃ©connexion", "Déconnexion")
+    .replaceAll("publiÃ©", "publié")
+    .replaceAll("MasquÃ©", "Masqué")
+    .replaceAll("ArchivÃ©", "Archivé")
+    .replaceAll(" Â· ", " · ");
+
+  if (!s.includes("async function sauvegarderLogement")) {
+    const fn = `
+  async function sauvegarderLogement(logement: Logement) {
+    const { error } = await supabase
+      .from("logements")
+      .update({
+        prix: logement.prix,
+        chambres: logement.chambres,
+        voyageurs: logement.voyageurs,
+        statut: logement.statut,
+      })
+      .eq("id", logement.id);
+
+    if (error) {
+      setMessage("Erreur sauvegarde : " + error.message);
+      return;
+    }
+
+    setMessage("Modifications enregistrées ✅");
+  }
+`;
+    s = s.replace("  async function supprimerLogement", fn + "\n  async function supprimerLogement");
+  }
+  return s;
+});
+
+// 3) Corriger résultats : afficher les vraies photos Supabase avant les images fallback.
+patch(files.resultats, (s) => {
+  s = s.replace(
+    "const imagePrincipale = getLogementFallbackImage(index);",
+    "const imagePrincipale = photosBase[0] || l.image_url || getLogementFallbackImage(index);"
+  );
+  s = s.replaceAll("text-#3F7D3B", "text-[#3F7D3B]");
+  s = s.replaceAll("bg-#3F7D3B", "bg-[#3F7D3B]");
+  return s;
+});
+
+// 4) Corriger réservations : classes Tailwind invalides + cohérence accès admin.
+patch(files.adminReservations, (s) => {
+  s = s.replaceAll("bg-#3F7D3B", "bg-[#3F7D3B]");
+  s = s.replaceAll("text-#3F7D3B", "text-[#3F7D3B]");
+  s = s.replace(
+    'const ok = localStorage.getItem("marbnb_admin_ok") === "true";',
+    'const ok = localStorage.getItem("marbnb_admin_ok") === "true" || localStorage.getItem("mbnb_admin_ok") === "true";'
+  );
+  s = s.replace(
+    'localStorage.removeItem("marbnb_admin_ok");',
+    'localStorage.removeItem("marbnb_admin_ok");\n    localStorage.removeItem("mbnb_admin_ok");'
+  );
+  return s;
+});
+
+// 5) Corriger petits problèmes de className dans compte si présents.
+patch(files.compte, (s) => {
+  s = s.replaceAll("text-#3F7D3B", "text-[#3F7D3B]");
+  return s;
+});
+
+// 6) Amélioration : page installation en JSX propre si nécessaire.
+if (exists(files.installation)) {
+  const current = read(files.installation);
+  if (!current.includes("<main") || current.includes("Application Marbnb")) {
+    write(files.installation, String.raw`"use client";
+
+export default function InstallationPage() {
+  return (
+    <main className="min-h-screen bg-[#f4ead7] px-4 py-8 text-[#1e1b18]">
+      <section className="mx-auto max-w-3xl rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3] md:p-8">
+        <a href="/" className="font-black text-[#c1121f]">← Retour accueil</a>
+        <p className="mt-6 font-black text-[#c1121f]">Application Marbnb</p>
+        <h1 className="mt-2 text-4xl font-black">Installer Marbnb sur Android et iPhone</h1>
+        <p className="mt-4 leading-7 text-[#7a6446]">
+          Cette version transforme le site en application installable. Le site reste le même : quand vous modifiez le site ou l’admin, l’application se met à jour automatiquement.
+        </p>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]">
+            <h2 className="text-xl font-black">Android</h2>
+            <ul className="mt-3 list-disc space-y-2 pl-5 text-[#5f4b32]">
+              <li>Ouvrir Marbnb dans Chrome.</li>
+              <li>Appuyer sur le bouton “Installer” si le message apparaît.</li>
+              <li>Sinon : menu ⋮ puis “Ajouter à l’écran d’accueil”.</li>
+            </ul>
+          </div>
+          <div className="rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]">
+            <h2 className="text-xl font-black">iPhone</h2>
+            <ul className="mt-3 list-disc space-y-2 pl-5 text-[#5f4b32]">
+              <li>Ouvrir Marbnb dans Safari.</li>
+              <li>Appuyer sur le bouton Partager.</li>
+              <li>Choisir “Ajouter à l’écran d’accueil”.</li>
+              <li>Valider avec le nom “Marbnb”.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="mt-6 rounded-3xl bg-white p-5 ring-1 ring-[#e5d3b3]">
+          <h2 className="text-xl font-black">Modifier le site</h2>
+          <p className="mt-2 text-[#7a6446]">Les modifications restent centralisées sur le site web. Pour modifier les logements, réservations et demandes, utilisez l’espace Admin.</p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <a href="/admin-dashboard" className="rounded-full bg-[#c1121f] px-5 py-3 text-sm font-black text-white">Ouvrir Admin</a>
+            <a href="/resultats" className="rounded-full bg-[#3F7D3B] px-5 py-3 text-sm font-black text-white">Explorer</a>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
+`);
+  }
+}
+
+console.log("\n✅ Corrections Marbnb terminées.");
+console.log("Étape suivante : npm run build");
+console.log("Si le build est OK : git add . && git commit -m \"Fix Marbnb admin workflow\" && git push");

@@ -71,11 +71,31 @@ export default function AdminLogementsPage() {
       return;
     }
     setLogements((old) => old.map((l) => (l.id === id ? { ...l, ...updates } : l)));
-    setMessage("Modification enregistrÃ©e âœ…");
+    setMessage("Modification enregistrée ✅");
+  }
+
+
+  async function sauvegarderLogement(logement: Logement) {
+    const { error } = await supabase
+      .from("logements")
+      .update({
+        prix: logement.prix,
+        chambres: logement.chambres,
+        voyageurs: logement.voyageurs,
+        statut: logement.statut,
+      })
+      .eq("id", logement.id);
+
+    if (error) {
+      setMessage("Erreur sauvegarde : " + error.message);
+      return;
+    }
+
+    setMessage("Modifications enregistrées ✅");
   }
 
   async function supprimerLogement(id: number) {
-    const ok = window.confirm("Supprimer dÃ©finitivement ce logement ?");
+    const ok = window.confirm("Supprimer définitivement ce logement ?");
     if (!ok) return;
 
     const { error } = await supabase.from("logements").delete().eq("id", id);
@@ -84,7 +104,7 @@ export default function AdminLogementsPage() {
       return;
     }
     setLogements((old) => old.filter((l) => l.id !== id));
-    setMessage("Logement supprimÃ© âœ…");
+    setMessage("Logement supprimé ✅");
   }
 
   function deconnexion() {
@@ -93,24 +113,24 @@ export default function AdminLogementsPage() {
   }
 
   if (!autorise) {
-    return <main className="min-h-screen bg-[#f4ead7] p-8 font-black">VÃ©rification accÃ¨s admin...</main>;
+    return <main className="min-h-screen bg-[#f4ead7] p-8 font-black">Vérification accès admin...</main>;
   }
 
   return (
     <main className="min-h-screen bg-[#f4ead7] px-4 py-8 text-[#1e1b18]">
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div><a href="/admin-demandes" className="text-sm font-black text-[#c1121f]">â† Demandes hÃ´tes</a><a href="/admin-dashboard" className="ml-3 text-sm font-black text-[#7a3d14]">Dashboard</a></div>
+          <div><a href="/admin-demandes" className="text-sm font-black text-[#c1121f]">← Demandes hôtes</a><a href="/admin-dashboard" className="ml-3 text-sm font-black text-[#7a3d14]">Dashboard</a></div>
           <div className="flex flex-wrap gap-2">
-            <a href="/resultats" className="rounded-full bg-[#3F7D3B] px-5 py-2 text-sm font-black text-white">Voir rÃ©sultats</a>
-            <button onClick={deconnexion} className="rounded-full bg-red-700 px-5 py-2 text-sm font-black text-white">DÃ©connexion</button>
+            <a href="/resultats" className="rounded-full bg-[#3F7D3B] px-5 py-2 text-sm font-black text-white">Voir résultats</a>
+            <button onClick={deconnexion} className="rounded-full bg-red-700 px-5 py-2 text-sm font-black text-white">Déconnexion</button>
           </div>
         </div>
 
         <section className="mt-5 rounded-[2rem] bg-[#fff8ec] p-6 shadow-sm ring-1 ring-[#e5d3b3]">
           <p className="font-black text-[#c1121f]">Admin Marbnb</p>
           <h1 className="mt-2 text-4xl font-black">Gestion des logements</h1>
-          <p className="mt-3 text-[#7a6446]">Modifier le prix, changer le statut ou supprimer un logement publiÃ©.</p>
+          <p className="mt-3 text-[#7a6446]">Modifier le prix, changer le statut ou supprimer un logement publié.</p>
 
           {message && <p className="mt-4 rounded-2xl bg-[#EAF3E4] p-4 font-bold text-[#3F7D3B]">{message}</p>}
           {loading && <p className="mt-6 font-bold">Chargement...</p>}
@@ -139,7 +159,7 @@ export default function AdminLogementsPage() {
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <h2 className="text-2xl font-black">{l.titre}</h2>
-                        <p className="text-sm text-[#7a6446]">{l.type_logement} Â· {l.quartier}, {l.ville}</p>
+                        <p className="text-sm text-[#7a6446]">{l.type_logement} · {l.quartier}, {l.ville}</p>
                       </div>
                       <span className="rounded-full bg-[#f4ead7] px-4 py-2 text-sm font-black text-[#7a3d14]">{l.statut || "Actif"}</span>
                     </div>
@@ -161,15 +181,15 @@ export default function AdminLogementsPage() {
                         <label className="text-xs font-black text-[#7a3d14]">Statut</label>
                         <select value={l.statut || "Actif"} onChange={(e) => updateLogement(l.id, { statut: e.target.value })} className="mt-1 w-full rounded-2xl border bg-white px-4 py-3 outline-none">
                           <option>Actif</option>
-                          <option>MasquÃ©</option>
-                          <option>ArchivÃ©</option>
+                          <option>Masqué</option>
+                          <option>Archivé</option>
                         </select>
                       </div>
                     </div>
 
                     <div className="mt-5 flex flex-wrap gap-3">
                       <button onClick={() => updateLogement(l.id, { statut: "Actif" })} className="rounded-full bg-[#3F7D3B] px-5 py-3 text-sm font-black text-white">Activer</button>
-                      <button onClick={() => updateLogement(l.id, { statut: "MasquÃ©" })} className="rounded-full bg-amber-600 px-5 py-3 text-sm font-black text-white">Masquer</button>
+                      <button onClick={() => updateLogement(l.id, { statut: "Masqué" })} className="rounded-full bg-amber-600 px-5 py-3 text-sm font-black text-white">Masquer</button>
                       <button onClick={() => sauvegarderLogement(l)} className="rounded-full bg-[#3F7D3B] px-5 py-3 text-sm font-black text-white shadow hover:bg-[#2f6f34]">Valider les modifications</button><button onClick={() => supprimerLogement(l.id)} className="rounded-full bg-red-700 px-5 py-3 text-sm font-black text-white">Supprimer</button>
                     </div>
                   </div>

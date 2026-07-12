@@ -114,7 +114,7 @@ export default function ComptePage() {
           <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Mot de passe" className="rounded-2xl border bg-white px-4 py-3 outline-none" />
           <button disabled={loading} className="rounded-2xl bg-[#c1121f] px-6 py-4 font-black text-white disabled:opacity-60">{loading ? "Traitement..." : mode === "creation" ? "Créer mon compte" : "Me connecter"}</button>
         </form>
-        {message && <p className="mt-5 rounded-2xl bg-[#EAF3E4] p-4 font-bold text-#3F7D3B">{message}</p>}
+        {message && <p className="mt-5 rounded-2xl bg-[#EAF3E4] p-4 font-bold text-[#3F7D3B]">{message}</p>}
         <div className="mt-6 flex flex-wrap gap-3">
           <a href="/resultats" className="rounded-full bg-[#3F7D3B] px-5 py-3 text-sm font-black text-white">Explorer</a>
           <a href="/hote" className="rounded-full bg-white px-5 py-3 text-sm font-black text-[#7a3d14] ring-1 ring-[#e5d3b3]">Devenir hôte</a>

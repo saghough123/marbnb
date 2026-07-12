@@ -40,7 +40,7 @@ export default function AdminReservationsPage() {
   const [filtre, setFiltre] = useState("Toutes");
 
   useEffect(() => {
-    const ok = localStorage.getItem("marbnb_admin_ok") === "true";
+    const ok = localStorage.getItem("marbnb_admin_ok") === "true" || localStorage.getItem("mbnb_admin_ok") === "true";
     if (!ok) {
       window.location.href = "/admin-login";
       return;
@@ -88,6 +88,7 @@ export default function AdminReservationsPage() {
 
   function deconnexion() {
     localStorage.removeItem("marbnb_admin_ok");
+    localStorage.removeItem("mbnb_admin_ok");
     window.location.href = "/admin-login";
   }
 
@@ -120,7 +121,7 @@ export default function AdminReservationsPage() {
           <h1 className="mt-2 text-4xl font-black">Gestion des réservations</h1>
           <p className="mt-3 text-[#7a6446]">Voir, confirmer, annuler ou supprimer les réservations.</p>
 
-          {message && <p className="mt-4 rounded-2xl bg-[#EAF3E4] p-4 font-bold text-#3F7D3B">{message}</p>}
+          {message && <p className="mt-4 rounded-2xl bg-[#EAF3E4] p-4 font-bold text-[#3F7D3B]">{message}</p>}
           {loading && <p className="mt-6 font-bold">Chargement...</p>}
 
           {!loading && (
@@ -168,7 +169,7 @@ export default function AdminReservationsPage() {
                           <td className="py-3"><span className="rounded-full bg-[#f4ead7] px-3 py-1 text-xs font-black text-[#7a3d14]">{getText(r, ["statut", "status"])}</span></td>
                           <td className="py-3">
                             <div className="flex flex-wrap gap-2">
-                              <button onClick={() => changerStatut(id, "Confirmée")} className="rounded-full bg-#3F7D3B px-3 py-2 text-xs font-black text-white">Confirmer</button>
+                              <button onClick={() => changerStatut(id, "Confirmée")} className="rounded-full bg-[#3F7D3B] px-3 py-2 text-xs font-black text-white">Confirmer</button>
                               <button onClick={() => changerStatut(id, "Annulée")} className="rounded-full bg-amber-600 px-3 py-2 text-xs font-black text-white">Annuler</button>
                               <button onClick={() => supprimerReservation(id)} className="rounded-full bg-red-700 px-3 py-2 text-xs font-black text-white">Supprimer</button>
                             </div>
